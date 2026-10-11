@@ -185,14 +185,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="lg:col-span-7">
           <Card className="h-full flex flex-col justify-between">
             <CardHeader className="mb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
                   <CardTitle>Recent Transactions</CardTitle>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Latest completed expenses & debits
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
@@ -275,7 +275,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="lg:col-span-5">
           <Card className="h-full flex flex-col justify-between">
             <CardHeader className="mb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div>
                   <CardTitle>Upcoming Commitments</CardTitle>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -286,7 +286,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => onNavigate('commitments')}
-                  className="text-xs text-slate-400 hover:text-white"
+                  className="text-xs text-slate-400 hover:text-white shrink-0 self-start sm:self-auto"
                 >
                   Manage <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Button>

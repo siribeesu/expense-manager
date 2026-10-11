@@ -167,7 +167,7 @@ export const AppLayout: React.FC = () => {
           id="main-content"
           className="flex-1 lg:pl-64 w-full transition-all duration-150"
         >
-          <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
+          <div className="w-full px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-28 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
             <ErrorBoundary level="view">
               <Suspense fallback={<ViewSkeleton />}>
                 {activeTab === 'overview' && (

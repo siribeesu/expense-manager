@@ -237,7 +237,7 @@ export const GoalsView: React.FC = () => {
                 </div>
 
                 {/* Transfer Action Buttons */}
-                <div className="pt-2 flex items-center gap-2">
+                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Button
                     variant="primary"
                     size="sm"

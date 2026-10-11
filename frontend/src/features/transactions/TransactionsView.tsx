@@ -134,7 +134,7 @@ export const TransactionsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5">
           <Button
             variant="outline"
             size="md"
@@ -169,45 +169,45 @@ export const TransactionsView: React.FC = () => {
       </div>
 
       {/* Ledger Analytics Ribbon */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-        <Card className="p-3.5 flex flex-col justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
+        <Card className="p-3 sm:p-3.5 flex flex-col justify-between">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Filtered Outlay
           </span>
-          <span className="text-xl font-extrabold text-white font-mono mt-1">
+          <span className="text-lg sm:text-xl font-extrabold text-white font-mono mt-1 truncate">
             {formatINR(filteredTotal)}
           </span>
-          <span className="text-[11px] text-slate-400 mt-0.5">Across current selection</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Across current selection</span>
         </Card>
 
-        <Card className="p-3.5 flex flex-col justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <Card className="p-3 sm:p-3.5 flex flex-col justify-between">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Total Records
           </span>
-          <span className="text-xl font-extrabold text-[#C8FF55] font-mono mt-1">
+          <span className="text-lg sm:text-xl font-extrabold text-[#C8FF55] font-mono mt-1 truncate">
             {filteredTransactions.length}
           </span>
-          <span className="text-[11px] text-slate-400 mt-0.5">of {transactions.length} total logged</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">of {transactions.length} total logged</span>
         </Card>
 
-        <Card className="p-3.5 flex flex-col justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <Card className="p-3 sm:p-3.5 flex flex-col justify-between">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Average Spend
           </span>
-          <span className="text-xl font-extrabold text-cyan-400 font-mono mt-1">
+          <span className="text-lg sm:text-xl font-extrabold text-cyan-400 font-mono mt-1 truncate">
             {formatINR(avgTransaction)}
           </span>
-          <span className="text-[11px] text-slate-400 mt-0.5">Per recorded transaction</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Per recorded transaction</span>
         </Card>
 
-        <Card className="p-3.5 flex flex-col justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <Card className="p-3 sm:p-3.5 flex flex-col justify-between">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Largest Outlay
           </span>
-          <span className="text-xl font-extrabold text-amber-400 font-mono mt-1">
+          <span className="text-lg sm:text-xl font-extrabold text-amber-400 font-mono mt-1 truncate">
             {formatINR(largestTransaction)}
           </span>
-          <span className="text-[11px] text-slate-400 mt-0.5">Peak single purchase</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Peak single purchase</span>
         </Card>
       </div>
 

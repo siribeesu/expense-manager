@@ -28,16 +28,16 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
   const { theme } = useTheme();
 
   return (
-    <Card className="flex flex-col justify-between p-5">
+    <Card className="flex flex-col justify-between p-4 sm:p-5">
       <CardHeader className="mb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
             <CardTitle>30-Day Cash Flow & Runway Forecast</CardTitle>
             <CardDescription>
               Comparing actual path with projected base trajectory & simulated decision
             </CardDescription>
           </div>
-          <div className="flex items-center gap-3 text-xs font-mono">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono flex-wrap">
             <span className="flex items-center gap-1.5 text-slate-300">
               <span className={`w-3 h-0.5 ${theme === 'dark' ? 'bg-[#C8FF55]' : 'bg-[#16A34A]'}`} /> Current Plan
             </span>

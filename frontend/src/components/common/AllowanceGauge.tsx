@@ -39,8 +39,8 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
   };
 
   return (
-    <Card className="flex flex-col justify-between p-5 relative overflow-hidden bg-gradient-to-br from-[#131B2F] via-[#131B2F] to-[#1A2542] border border-slate-700/60 shadow-xl transition-all">
-      <div className="flex items-start justify-between">
+    <Card className="flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-[#131B2F] via-[#131B2F] to-[#1A2542] border border-slate-700/60 shadow-xl transition-all">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
         <div>
           <div className="flex items-center gap-2">
             <span className="p-1 rounded-md bg-[#C8FF55]/20 text-[#C8FF55]">
@@ -51,9 +51,9 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#C8FF55] animate-pulse" />
           </div>
-          <h2 className="text-xl font-bold text-white mt-1">Safe Daily Spending Limit</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-white mt-1">Safe Daily Spending Limit</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <Badge variant={isPaceSustainable ? 'lime' : 'amber'}>
             {isPaceSustainable ? '✨ Runway Sustainable' : '⚠️ Pace Warning'}
           </Badge>

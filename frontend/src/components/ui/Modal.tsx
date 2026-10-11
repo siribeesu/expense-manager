@@ -122,7 +122,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -134,7 +134,7 @@ export const Modal: React.FC<ModalProps> = ({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'w-full bg-[#131B2F] border border-slate-700/80 rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto cursor-default outline-none',
+          'w-full bg-[#131B2F] border border-slate-700/80 rounded-2xl shadow-2xl p-4 sm:p-6 relative max-h-[90dvh] overflow-y-auto overscroll-contain cursor-default outline-none',
           maxWidths[maxWidth]
         )}
       >

@@ -44,7 +44,7 @@ export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = ({
 
   return (
     <div className={`p-4 rounded-2xl border ${current.border} space-y-3`}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
         <div className="flex items-start gap-3">
           {current.icon}
           <div>
@@ -56,7 +56,9 @@ export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = ({
             </p>
           </div>
         </div>
-        {current.badge}
+        <div className="self-start sm:self-auto shrink-0">
+          {current.badge}
+        </div>
       </div>
 
       <div className="p-3 rounded-xl bg-[#0B1020]/70 border border-slate-800 flex items-start gap-2.5 text-xs text-slate-300">
