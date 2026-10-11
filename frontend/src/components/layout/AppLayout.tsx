@@ -1,21 +1,37 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { type ActiveTab, Sidebar } from './Sidebar';
 import { TopNavbar } from './TopNavbar';
 import { MobileNav } from './MobileNav';
 import { ToastContainer } from '../common/ToastContainer';
 import { CommandPalette } from '../common/CommandPalette';
 import { KeyboardShortcutsModal } from '../common/KeyboardShortcutsModal';
-import { DashboardView } from '../../features/dashboard/DashboardView';
-import { SimulatorView } from '../../features/simulator/SimulatorView';
-import { TransactionsView } from '../../features/transactions/TransactionsView';
-import { GoalsView } from '../../features/goals/GoalsView';
-import { CommitmentsView } from '../../features/commitments/CommitmentsView';
-import { InsightsView } from '../../features/insights/InsightsView';
+import { ErrorBoundary } from '../common/ErrorBoundary';
+import { ViewSkeleton } from '../common/ViewSkeleton';
 import { TransactionFormModal } from '../../features/transactions/TransactionFormModal';
 import { useFinance } from '../../context/useFinance';
 import { useTheme } from '../../context/useTheme';
 import { exportTransactionsToCsv } from '../../lib/exportCsv';
 import { fireConfetti } from '../../lib/confetti';
+
+// Route-based Code Splitting with React.lazy
+const DashboardView = lazy(() =>
+  import('../../features/dashboard/DashboardView').then((m) => ({ default: m.DashboardView }))
+);
+const SimulatorView = lazy(() =>
+  import('../../features/simulator/SimulatorView').then((m) => ({ default: m.SimulatorView }))
+);
+const TransactionsView = lazy(() =>
+  import('../../features/transactions/TransactionsView').then((m) => ({ default: m.TransactionsView }))
+);
+const GoalsView = lazy(() =>
+  import('../../features/goals/GoalsView').then((m) => ({ default: m.GoalsView }))
+);
+const CommitmentsView = lazy(() =>
+  import('../../features/commitments/CommitmentsView').then((m) => ({ default: m.CommitmentsView }))
+);
+const InsightsView = lazy(() =>
+  import('../../features/insights/InsightsView').then((m) => ({ default: m.InsightsView }))
+);
 
 export const AppLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
@@ -24,7 +40,7 @@ export const AppLayout: React.FC = () => {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
-  const { currentDay, totalDays, addTransaction, advanceDay, transactions } = useFinance();
+  const { currentDay, totalDays, addTransaction, advanceDay, transactions, showToast } = useFinance();
   const { toggleTheme } = useTheme();
 
   const handleNavigate = useCallback((tab: ActiveTab) => {
@@ -103,6 +119,14 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#C8FF55]/30 selection:text-[#C8FF55] relative">
+      {/* Accessible Keyboard Skip Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#C8FF55] focus:text-[#0B1020] focus:font-bold focus:rounded-xl focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* Subtle Ambient Background Mesh / Radial Glows */}
       <div
         className="fixed top-0 left-1/4 w-[600px] h-[400px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none -z-10"
@@ -136,26 +160,30 @@ export const AppLayout: React.FC = () => {
           className="flex-1 lg:pl-64 w-full transition-all duration-150"
         >
           <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
-            {activeTab === 'overview' && (
-              <DashboardView
-                onNavigate={handleNavigate}
-                onOpenAddTransaction={() => setIsQuickAddOpen(true)}
-              />
-            )}
+            <ErrorBoundary>
+              <Suspense fallback={<ViewSkeleton />}>
+                {activeTab === 'overview' && (
+                  <DashboardView
+                    onNavigate={handleNavigate}
+                    onOpenAddTransaction={() => setIsQuickAddOpen(true)}
+                  />
+                )}
 
-            {activeTab === 'simulator' && <SimulatorView />}
+                {activeTab === 'simulator' && <SimulatorView />}
 
-            {activeTab === 'transactions' && <TransactionsView />}
+                {activeTab === 'transactions' && <TransactionsView />}
 
-            {activeTab === 'goals' && <GoalsView />}
+                {activeTab === 'goals' && <GoalsView />}
 
-            {activeTab === 'commitments' && <CommitmentsView />}
+                {activeTab === 'commitments' && <CommitmentsView />}
 
-            {activeTab === 'insights' && (
-              <InsightsView
-                onNavigate={handleNavigate}
-              />
-            )}
+                {activeTab === 'insights' && (
+                  <InsightsView
+                    onNavigate={handleNavigate}
+                  />
+                )}
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </main>
       </div>
@@ -175,7 +203,15 @@ export const AppLayout: React.FC = () => {
         onClose={() => setIsCommandPaletteOpen(false)}
         onNavigate={handleNavigate}
         onOpenAddExpense={() => setIsQuickAddOpen(true)}
-        onExportCsv={() => exportTransactionsToCsv(transactions)}
+        onExportCsv={() =>
+          exportTransactionsToCsv(transactions, (res) => {
+            showToast({
+              title: res.success ? 'Export Complete' : 'Export Notice',
+              description: res.message,
+              type: res.success ? 'success' : 'warning',
+            });
+          })
+        }
       />
 
       {/* Keyboard Shortcuts Helper Modal (?) */}

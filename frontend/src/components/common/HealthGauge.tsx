@@ -54,7 +54,12 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
       <div className="my-4 flex items-center gap-5">
         {/* Score Ring Display */}
         <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
-          <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 36 36">
+          <svg
+            role="img"
+            aria-label={`Financial health score: ${activeScore} out of 100, risk level: ${activeRisk}`}
+            className="w-full h-full -rotate-90 transform"
+            viewBox="0 0 36 36"
+          >
             <path
               className="text-slate-800"
               strokeWidth="3.5"

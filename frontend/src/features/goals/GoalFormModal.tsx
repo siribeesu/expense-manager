@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { sanitizeText } from '../../lib/sanitizer';
 import type { SavingsGoal } from '../../types/finance';
 
 export interface GoalFormModalProps {
@@ -63,13 +64,17 @@ const GoalFormContent: React.FC<FormContentProps> = ({
   const [targetAmount, setTargetAmount] = useState(initialData ? String(initialData.targetAmount) : '2000');
   const [targetDay, setTargetDay] = useState(initialData ? initialData.targetDay : totalDays);
   const [notes, setNotes] = useState(initialData?.notes || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; targetAmount?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const newErrors: { name?: string; targetAmount?: string } = {};
 
-    if (!name.trim()) {
+    const cleanName = sanitizeText(name);
+    if (!cleanName) {
       newErrors.name = 'Goal name is required';
     }
 
@@ -83,15 +88,20 @@ const GoalFormContent: React.FC<FormContentProps> = ({
       return;
     }
 
-    onSubmit({
-      name: name.trim(),
-      targetAmount: numTarget,
-      targetDay,
-      categoryIcon: 'ShieldCheck',
-      color: '#10B981',
-      notes: notes.trim(),
-    });
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        name: cleanName,
+        targetAmount: numTarget,
+        targetDay,
+        categoryIcon: 'ShieldCheck',
+        color: '#10B981',
+        notes: notes ? sanitizeText(notes) : undefined,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -139,7 +149,14 @@ const GoalFormContent: React.FC<FormContentProps> = ({
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" size="sm" className="font-bold">
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+          className="font-bold"
+        >
           {initialData ? 'Save Goal' : 'Create Goal'}
         </Button>
       </div>
