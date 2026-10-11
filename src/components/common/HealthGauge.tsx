@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import type { FinancialHealthBreakdown } from '../../types/finance';
@@ -11,7 +11,7 @@ export interface HealthGaugeProps {
   compact?: boolean;
 }
 
-export const HealthGauge: React.FC<HealthGaugeProps> = ({
+const HealthGaugeComponent: React.FC<HealthGaugeProps> = ({
   health,
   simulatedHealthScore,
   simulatedRiskLevel,
@@ -117,3 +117,6 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
     </Card>
   );
 };
+
+export const HealthGauge = memo(HealthGaugeComponent);
+

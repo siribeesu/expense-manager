@@ -35,6 +35,7 @@ export const CommitmentsView: React.FC = () => {
   const [editingCommitment, setEditingCommitment] = useState<Commitment | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [filterType, setFilterType] = useState<'all' | 'subscriptions' | 'bills'>('all');
 
   const handleMarkPaid = (id: string) => {
     if (processingIds.has(id)) return;
@@ -63,8 +64,13 @@ export const CommitmentsView: React.FC = () => {
   };
 
   // Subscriptions vs general commitments
-  const unpaidCommitments = commitments.filter((c) => !c.isPaid);
-  const paidCommitments = commitments.filter((c) => c.isPaid);
+  const filteredCommitments = commitments.filter((c) => {
+    if (filterType === 'subscriptions') return Boolean(c.isSubscription);
+    if (filterType === 'bills') return !c.isSubscription;
+    return true;
+  });
+  const unpaidCommitments = filteredCommitments.filter((c) => !c.isPaid);
+  const paidCommitments = filteredCommitments.filter((c) => c.isPaid);
 
   const totalOutstanding = metrics.reservedCommitments;
   const subscriptions = commitments.filter((c) => c.isSubscription);
@@ -106,7 +112,7 @@ export const CommitmentsView: React.FC = () => {
             {formatINR(totalOutstanding)}
           </span>
           <span className="text-xs text-slate-400">
-            {unpaidCommitments.length} pending obligations locked in forecast
+            {commitments.filter((c) => !c.isPaid).length} pending obligations locked in forecast
           </span>
         </Card>
 
@@ -118,7 +124,7 @@ export const CommitmentsView: React.FC = () => {
             {formatINR(monthlySubscriptionTotal)}
           </span>
           <span className="text-xs text-slate-400">
-            {subscriptions.length} active digital services
+            {subscriptions.length} active digital OTT / app services
           </span>
         </Card>
 
@@ -127,12 +133,35 @@ export const CommitmentsView: React.FC = () => {
             Settled This Month
           </span>
           <span className="text-2xl font-extrabold text-emerald-400 font-mono mt-1 block">
-            {paidCommitments.length} Paid
+            {commitments.filter((c) => c.isPaid).length} Paid
           </span>
           <span className="text-xs text-slate-400">
             Converted to actual expenses without double-counting
           </span>
         </Card>
+      </div>
+
+      {/* Filter Tabs: All vs Subscriptions vs Fixed Bills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {([
+          { id: 'all', label: `All Commitments (${commitments.length})` },
+          { id: 'subscriptions', label: `📱 Subscriptions & OTT (${subscriptions.length})` },
+          { id: 'bills', label: `⚡ Fixed Bills & Rent (${commitments.length - subscriptions.length})` },
+        ] as const).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setFilterType(tab.id)}
+            aria-pressed={filterType === tab.id}
+            className={`text-xs px-3.5 py-1.5 rounded-xl font-semibold transition-all cursor-pointer border ${
+              filterType === tab.id
+                ? 'bg-[#C8FF55] text-[#0B1020] border-[#C8FF55] shadow-sm'
+                : 'bg-[#131B2F] text-slate-300 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Section 1: Upcoming Unpaid Commitments */}

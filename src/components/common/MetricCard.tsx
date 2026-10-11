@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '../ui/Card';
 import { cn } from '../../lib/utils';
 import type { LucideIcon } from 'lucide-react';
@@ -16,7 +16,7 @@ export interface MetricCardProps {
   highlight?: boolean;
 }
 
-export const MetricCard: React.FC<MetricCardProps> = ({
+const MetricCardComponent: React.FC<MetricCardProps> = ({
   title,
   value,
   subtext,
@@ -46,7 +46,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           </div>
         </div>
         {Icon && (
-          <div className={cn('p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/50 shrink-0', iconColor)}>
+          <div className={cn('p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/50 shrink-0', iconColor)} aria-hidden="true">
             <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         )}
@@ -73,3 +73,5 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     </Card>
   );
 };
+
+export const MetricCard = memo(MetricCardComponent);

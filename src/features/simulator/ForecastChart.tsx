@@ -20,7 +20,7 @@ export interface ForecastChartProps {
   totalBudget: number;
 }
 
-export const ForecastChart: React.FC<ForecastChartProps> = ({
+export const ForecastChart: React.FC<ForecastChartProps> = React.memo(({
   forecastData,
   currentDay,
   totalBudget,
@@ -143,4 +143,5 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
       </div>
     </Card>
   );
-};
+});
+ForecastChart.displayName = 'ForecastChart';

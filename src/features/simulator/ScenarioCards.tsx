@@ -15,7 +15,7 @@ export interface ScenarioCardsProps {
   selectedAmount?: number;
 }
 
-export const ScenarioCards: React.FC<ScenarioCardsProps> = ({
+export const ScenarioCards: React.FC<ScenarioCardsProps> = React.memo(({
   onSelectScenario,
   selectedAmount,
 }) => {
@@ -47,7 +47,8 @@ export const ScenarioCards: React.FC<ScenarioCardsProps> = ({
           const isSelected = selectedAmount === scenario.amount;
 
           return (
-            <div
+            <button
+              type="button"
               key={scenario.id}
               onClick={() =>
                 onSelectScenario({
@@ -57,6 +58,7 @@ export const ScenarioCards: React.FC<ScenarioCardsProps> = ({
                   type: scenario.type,
                 })
               }
+              aria-pressed={isSelected}
               className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all duration-150 hover:-translate-y-0.5 ${
                 isSelected
                   ? 'bg-[#C8FF55]/15 border-[#C8FF55] shadow-[0_0_15px_rgba(200,255,85,0.15)]'
@@ -90,10 +92,11 @@ export const ScenarioCards: React.FC<ScenarioCardsProps> = ({
               <p className="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
                 {scenario.description}
               </p>
-            </div>
+            </button>
           );
         })}
       </div>
     </div>
   );
-};
+});
+ScenarioCards.displayName = 'ScenarioCards';

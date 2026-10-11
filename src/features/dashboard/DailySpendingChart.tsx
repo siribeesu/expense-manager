@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -21,33 +21,36 @@ export interface DailySpendingChartProps {
   safeDailyAllowance: number;
 }
 
-export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
+const DailySpendingChartComponent: React.FC<DailySpendingChartProps> = ({
   transactions,
   currentDay,
   totalDays,
   safeDailyAllowance,
 }) => {
   const { theme } = useTheme();
-  // Aggregate daily expenses
-  const dailySpendMap: Record<number, number> = {};
-  transactions.forEach((tx) => {
-    if (tx.type === 'expense' || tx.type === 'commitment_payment') {
-      dailySpendMap[tx.day] = (dailySpendMap[tx.day] || 0) + tx.amount;
-    }
-  });
 
-  const chartData = [];
-  for (let d = 1; d <= Math.min(totalDays, Math.max(currentDay, 15)); d++) {
-    const amount = dailySpendMap[d] || 0;
-    const isPastOrToday = d <= currentDay;
-    chartData.push({
-      day: `D${d}`,
-      dayNum: d,
-      spent: isPastOrToday ? amount : null,
-      projected: !isPastOrToday ? safeDailyAllowance : null,
-      isToday: d === currentDay,
+  const chartData = useMemo(() => {
+    const dailySpendMap: Record<number, number> = {};
+    transactions.forEach((tx) => {
+      if (tx.type === 'expense' || tx.type === 'commitment_payment') {
+        dailySpendMap[tx.day] = (dailySpendMap[tx.day] || 0) + tx.amount;
+      }
     });
-  }
+
+    const data = [];
+    for (let d = 1; d <= Math.min(totalDays, Math.max(currentDay, 15)); d++) {
+      const amount = dailySpendMap[d] || 0;
+      const isPastOrToday = d <= currentDay;
+      data.push({
+        day: `D${d}`,
+        dayNum: d,
+        spent: isPastOrToday ? amount : null,
+        projected: !isPastOrToday ? safeDailyAllowance : null,
+        isToday: d === currentDay,
+      });
+    }
+    return data;
+  }, [transactions, currentDay, totalDays, safeDailyAllowance]);
 
   return (
     <Card className="flex flex-col justify-between">
@@ -133,3 +136,6 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
     </Card>
   );
 };
+
+export const DailySpendingChart = React.memo(DailySpendingChartComponent);
+DailySpendingChart.displayName = 'DailySpendingChart';

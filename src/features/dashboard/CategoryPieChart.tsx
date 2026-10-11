@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import type { TransactionCategory } from '../../types/finance';
@@ -10,23 +10,27 @@ export interface CategoryPieChartProps {
   totalSpent: number;
 }
 
-export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ categoryTotals, totalSpent }) => {
+const CategoryPieChartComponent: React.FC<CategoryPieChartProps> = ({ categoryTotals, totalSpent }) => {
   const { theme } = useTheme();
-  const chartData = (Object.keys(categoryTotals) as TransactionCategory[])
-    .filter((cat) => categoryTotals[cat] > 0)
-    .map((cat) => {
-      const meta = getCategoryMeta(cat);
-      const amount = categoryTotals[cat];
-      const percentage = totalSpent > 0 ? (amount / totalSpent) * 100 : 0;
-      return {
-        name: meta.label,
-        category: cat,
-        value: amount,
-        percentage,
-        color: meta.color,
-      };
-    })
-    .sort((a, b) => b.value - a.value);
+  const chartData = useMemo(
+    () =>
+      (Object.keys(categoryTotals) as TransactionCategory[])
+        .filter((cat) => categoryTotals[cat] > 0)
+        .map((cat) => {
+          const meta = getCategoryMeta(cat);
+          const amount = categoryTotals[cat];
+          const percentage = totalSpent > 0 ? (amount / totalSpent) * 100 : 0;
+          return {
+            name: meta.label,
+            category: cat,
+            value: amount,
+            percentage,
+            color: meta.color,
+          };
+        })
+        .sort((a, b) => b.value - a.value),
+    [categoryTotals, totalSpent]
+  );
 
   return (
     <Card className="flex flex-col justify-between">
@@ -133,3 +137,6 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ categoryTota
     </Card>
   );
 };
+
+export const CategoryPieChart = React.memo(CategoryPieChartComponent);
+CategoryPieChart.displayName = 'CategoryPieChart';

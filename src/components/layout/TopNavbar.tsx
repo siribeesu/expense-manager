@@ -77,35 +77,26 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </button>
         )}
 
-        {/* Sync / Offline Vault Status Badge */}
+        {/* Survival Mode & Encrypted Vault Status Badge */}
         <div
           role="status"
           aria-live="polite"
           className={cn(
             'hidden md:flex items-center gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0',
-            isBackendConnected
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+            'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
           )}
-          title={
-            isBackendConnected
-              ? 'Live Cloud Synchronization Active · Remote Database Connected'
-              : 'Offline Mode · Financial records encrypted in local vault'
-          }
+          title="30-Day Survival Engine Active · Records Encrypted in Local Vault"
         >
           <span
-            className={cn(
-              'w-2 h-2 rounded-full shrink-0',
-              isBackendConnected
-                ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse'
-                : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-            )}
+            className="w-2 h-2 rounded-full shrink-0 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"
             aria-hidden="true"
           />
-          <span className="hidden lg:inline">{isBackendConnected ? 'Cloud Synced' : 'Offline · Encrypted Vault'}</span>
-          <span className="lg:hidden">{isBackendConnected ? 'Synced' : 'Vault'}</span>
+          <span className="hidden lg:inline">
+            {isBackendConnected ? '₹10k Survival Mode · Vault Secured' : 'Offline · Encrypted Vault'}
+          </span>
+          <span className="lg:hidden">Vault Active</span>
           <span className="sr-only">
-            {isBackendConnected ? 'Cloud synchronization is active' : 'Offline mode, ledger saved to encrypted vault'}
+            30-Day survival engine active, financial ledger saved to encrypted browser vault
           </span>
         </div>
 

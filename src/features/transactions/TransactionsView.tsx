@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useFinance } from '../../context/useFinance';
+import { useDebounce } from '../../hooks/useDebounce';
 import { formatINR, getCategoryMeta } from '../../lib/formatters';
 import type { Transaction, TransactionCategory } from '../../types/finance';
 import { Card } from '../../components/ui/Card';
@@ -47,6 +48,7 @@ export const TransactionsView: React.FC = () => {
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'day_desc' | 'day_asc' | 'amount_desc' | 'amount_asc'>('day_desc');
 
@@ -57,9 +59,10 @@ export const TransactionsView: React.FC = () => {
 
   // Filtered and Sorted list
   const filteredTransactions = useMemo(() => {
+    const query = debouncedSearchQuery.toLowerCase();
     return transactions
       .filter((tx) => {
-        const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = tx.description.toLowerCase().includes(query);
         const matchesCategory = selectedCategory === 'all' || tx.category === selectedCategory;
         return matchesSearch && matchesCategory;
       })
@@ -70,7 +73,7 @@ export const TransactionsView: React.FC = () => {
         if (sortBy === 'amount_asc') return a.amount - b.amount;
         return 0;
       });
-  }, [transactions, searchQuery, selectedCategory, sortBy]);
+  }, [transactions, debouncedSearchQuery, selectedCategory, sortBy]);
 
   const filteredTotal = useMemo(() => {
     return filteredTransactions.reduce((sum, tx) => sum + tx.amount, 0);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import type { FinancialMetrics } from '../../types/finance';
@@ -12,7 +12,7 @@ export interface ComparisonViewProps {
   expenseAmount: number;
 }
 
-export const ComparisonView: React.FC<ComparisonViewProps> = ({
+const ComparisonViewComponent: React.FC<ComparisonViewProps> = ({
   metrics,
   projection,
   expenseAmount,
@@ -32,9 +32,14 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       100
   );
 
+  const goalDrawdownNeeded =
+    projection.simulatedAvailableCash < 0
+      ? Math.min(metrics.reservedSavings, Math.abs(projection.simulatedAvailableCash))
+      : 0;
+
   const comparisonRows = [
     {
-      label: 'Remaining Available Cash',
+      label: 'Remaining Balance (Liquid Cash)',
       current: formatINR(metrics.availableCash),
       simulated: formatINR(projection.simulatedAvailableCash),
       delta: `${projection.deltaAvailableCash < 0 ? '-' : '+'}${formatINR(Math.abs(projection.deltaAvailableCash))}`,
@@ -48,19 +53,42 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       isNegativeDelta: projection.deltaDailyAllowance < 0,
     },
     {
-      label: 'Financial Health Score',
+      label: 'Savings Goals Impact',
+      current: `${formatINR(metrics.reservedSavings)} Safe`,
+      simulated:
+        goalDrawdownNeeded > 0
+          ? `${formatINR(Math.max(0, metrics.reservedSavings - goalDrawdownNeeded))} Left`
+          : `${formatINR(metrics.reservedSavings)} Safe`,
+      delta: goalDrawdownNeeded > 0 ? `-${formatINR(goalDrawdownNeeded)} Raid` : '100% Intact',
+      isNegativeDelta: goalDrawdownNeeded > 0,
+    },
+    {
+      label: 'Monthly Forecast (Day 30 Runway)',
+      current: '30/30 Days Safe',
+      simulated:
+        projection.simulatedAvailableCash < 0
+          ? `Deficit (${formatINR(projection.simulatedAvailableCash)})`
+          : '30/30 Days Safe',
+      delta:
+        projection.simulatedAvailableCash < 0
+          ? 'Runway Breached'
+          : 'Survives Month',
+      isNegativeDelta: projection.simulatedAvailableCash < 0,
+    },
+    {
+      label: 'Financial Risk Level',
+      current: metrics.health.riskLevel.toUpperCase(),
+      simulated: projection.simulatedRiskLevel.toUpperCase(),
+      delta: projection.simulatedRiskLevel !== metrics.health.riskLevel ? 'Risk Shift' : 'Stable',
+      isNegativeDelta:
+        projection.simulatedRiskLevel === 'critical' || projection.simulatedRiskLevel === 'high',
+    },
+    {
+      label: 'Overall Financial Health Score',
       current: `${metrics.health.totalScore} / 100`,
       simulated: `${projection.simulatedHealthScore} / 100`,
       delta: `${projection.deltaHealthScore < 0 ? '-' : '+'}${Math.abs(projection.deltaHealthScore)} pts`,
       isNegativeDelta: projection.deltaHealthScore < 0,
-    },
-    {
-      label: 'Risk Classification',
-      current: metrics.health.riskLevel.toUpperCase(),
-      simulated: projection.simulatedRiskLevel.toUpperCase(),
-      delta: projection.simulatedRiskLevel !== metrics.health.riskLevel ? 'Shift' : 'Stable',
-      isNegativeDelta:
-        projection.simulatedRiskLevel === 'critical' || projection.simulatedRiskLevel === 'high',
     },
     {
       label: '30-Day Budget Utilization',
@@ -76,10 +104,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-800">
         <div>
           <h4 className="text-sm font-bold text-white tracking-tight">
-            Current Plan vs. Simulated Decision
+            Current Plan vs. Simulated Decision (6-Factor Impact)
           </h4>
           <p className="text-xs text-slate-400">
-            Side-by-side delta preview for {formatINR(expenseAmount)} proposed outlay
+            Interconnected impact on balance, daily allowance, goals, forecast, risk & health for {formatINR(expenseAmount)}
           </p>
         </div>
         <div className="self-start sm:self-auto">
@@ -90,10 +118,11 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
       </div>
 
-      <div className="divide-y divide-slate-800/80">
+      <div className="divide-y divide-slate-800/80" role="list" aria-label="Simulated impact comparison">
         {comparisonRows.map((row) => (
           <div
             key={row.label}
+            role="listitem"
             className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
           >
             <span className="text-xs font-medium text-slate-300">
@@ -106,14 +135,14 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                 <span className="text-slate-400 font-semibold">{row.current}</span>
               </div>
 
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
 
-              <div className="text-right min-w-[65px] sm:min-w-[70px]">
+              <div className="text-right min-w-[65px] sm:min-w-[85px]">
                 <span className="text-[10px] text-slate-400 block sm:hidden">Simulated:</span>
                 <span className="text-white font-bold">{row.simulated}</span>
               </div>
 
-              <div className="min-w-[75px] text-right">
+              <div className="min-w-[85px] text-right">
                 <span
                   className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                     row.isNegativeDelta
@@ -131,3 +160,5 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
     </Card>
   );
 };
+
+export const ComparisonView = memo(ComparisonViewComponent);

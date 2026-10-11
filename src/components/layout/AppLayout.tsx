@@ -165,9 +165,12 @@ export const AppLayout: React.FC = () => {
         {/* Main Content Area */}
         <main
           id="main-content"
-          className="flex-1 lg:pl-64 w-full transition-all duration-150"
+          role="main"
+          tabIndex={-1}
+          aria-label="Financial Flightpath Workspace"
+          className="flex-1 lg:pl-64 w-full transition-all duration-150 focus:outline-none flex flex-col justify-between"
         >
-          <div className="w-full px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-28 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
+          <div className="w-full px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200 flex-1">
             <ErrorBoundary level="view">
               <Suspense fallback={<ViewSkeleton />}>
                 {activeTab === 'overview' && (
@@ -193,6 +196,19 @@ export const AppLayout: React.FC = () => {
               </Suspense>
             </ErrorBoundary>
           </div>
+
+          {/* Semantic Footer Landmark */}
+          <footer
+            role="contentinfo"
+            className="w-full px-3 sm:px-6 lg:px-8 py-4 pb-24 lg:pb-6 border-t border-slate-800/60 text-xs text-slate-400 max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2"
+          >
+            <p className="font-medium">
+              <strong className="text-white">Thriftly</strong> — Gen Z 30-Day Personal Finance & What-If Decision Simulator
+            </p>
+            <p className="font-mono text-[11px] text-slate-400">
+              Single-Source Accounting Engine · Zero-Knowledge Local Vault
+            </p>
+          </footer>
         </main>
       </div>
 

@@ -72,7 +72,17 @@ export function loadStoredState(): AppStoredState {
         const parsed = JSON.parse(decrypted);
         const validation = AppStoredStateSchema.safeParse(parsed);
         if (validation.success) {
-          return validation.data as AppStoredState;
+          const state = validation.data as AppStoredState;
+          const isEmpty =
+            (!state.transactions || state.transactions.length === 0) &&
+            (!state.savingsGoals || state.savingsGoals.length === 0) &&
+            (!state.commitments || state.commitments.length === 0);
+          if (isEmpty) {
+            const demo = getInitialDemoState();
+            saveStoredState(demo);
+            return demo;
+          }
+          return state;
         }
       }
     }
@@ -86,7 +96,9 @@ export function loadStoredState(): AppStoredState {
     const rawCommitments = getStorageItem(STORAGE_KEYS.COMMITMENTS);
 
     if (!rawTx || !rawGoals || !rawCommitments) {
-      return getInitialDemoState();
+      const demo = getInitialDemoState();
+      saveStoredState(demo);
+      return demo;
     }
 
     const candidateState: AppStoredState = {
@@ -100,15 +112,29 @@ export function loadStoredState(): AppStoredState {
 
     const validation = AppStoredStateSchema.safeParse(candidateState);
     if (validation.success) {
+      const state = validation.data as AppStoredState;
+      const isEmpty =
+        (!state.transactions || state.transactions.length === 0) &&
+        (!state.savingsGoals || state.savingsGoals.length === 0) &&
+        (!state.commitments || state.commitments.length === 0);
+      if (isEmpty) {
+        const demo = getInitialDemoState();
+        saveStoredState(demo);
+        return demo;
+      }
       // Save in protected authenticated vault
       saveStoredState(candidateState);
-      return validation.data as AppStoredState;
+      return state;
     }
 
-    return getInitialDemoState();
+    const demo = getInitialDemoState();
+    saveStoredState(demo);
+    return demo;
   } catch (error) {
     console.warn('Failed to parse localStorage state, falling back to initial state:', error);
-    return getInitialDemoState();
+    const demo = getInitialDemoState();
+    saveStoredState(demo);
+    return demo;
   }
 }
 

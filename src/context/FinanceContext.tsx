@@ -9,7 +9,6 @@ import { calculateFinancialMetrics } from '../engine/accounting';
 import { projectSimulation } from '../engine/forecast';
 import { loadStoredState, saveStoredState, getInitialDemoState } from '../lib/storage';
 import { FinanceContext, type ToastMessage } from './financeContextDef';
-import { financeSyncService } from '../services/financeSyncService';
 
 const DEFAULT_SIMULATION_PARAMS: SimulationParams = {
   description: 'Simulated Purchase / Expense',
@@ -24,37 +23,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Load initial persistent state from authenticated cryptographic vault
   const [persisted, setPersisted] = useState(() => loadStoredState());
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
+  const [isBackendConnected] = useState<boolean>(true);
 
   // Simulation state (isolated from actual state)
   const [simulationParams, setSimulationParamsState] = useState<SimulationParams>(DEFAULT_SIMULATION_PARAMS);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
-
-  // Check backend health & sync state from backend on mount
-  useEffect(() => {
-    let isMounted = true;
-    financeSyncService.checkHealth().then((isOnline) => {
-      if (!isMounted) return;
-      if (isOnline) {
-        setIsBackendConnected(true);
-        financeSyncService.pullInitialState().then((backendState) => {
-          if (backendState && isMounted) {
-            setPersisted((current) => {
-              const hasLocalData = current.transactions.length > 0 || current.savingsGoals.length > 0 || current.commitments.length > 0;
-              const hasBackendData = backendState.transactions.length > 0 || backendState.savingsGoals.length > 0 || backendState.commitments.length > 0;
-              if (hasBackendData || !hasLocalData) {
-                return backendState;
-              }
-              return current;
-            });
-          }
-        });
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   // Sync to encrypted localStorage whenever actual state changes
   useEffect(() => {
@@ -104,7 +77,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const loadScenarioIntoSimulation = useCallback((scenario: {
     description: string;
     amount: number;
-    category: any;
+    category: Transaction['category'];
+    type?: SimulationParams['expenseType'];
     delayDays?: number;
     isRecurring?: boolean;
   }) => {
@@ -112,14 +86,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       description: scenario.description,
       amount: scenario.amount,
       category: scenario.category,
-      expenseType: 'planned',
+      expenseType: scenario.type ?? 'planned',
       delayDays: scenario.delayDays ?? 0,
       isRecurring: !!scenario.isRecurring,
     });
     setIsSimulating(true);
     showToast({
       type: 'info',
-      title: 'Scenario Loaded',
+      title: 'Scenario Loaded in Simulator',
       description: `Testing: ${scenario.description} (₹${scenario.amount}) in What-If Simulator.`,
     });
   }, [showToast]);
@@ -161,16 +135,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [newTx, ...prev.transactions],
     }));
 
-    financeSyncService.syncTransactionCreate(newTx).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Expense Committed to Actual Records',
-      description: `Added ₹${simulationParams.amount} for "${simulationParams.description}". Metrics updated!`,
+      description: `Added ₹${simulationParams.amount} for "${simulationParams.description}". All metrics updated!`,
     });
 
     setIsSimulating(false);
@@ -191,16 +159,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [newTx, ...prev.transactions],
     }));
 
-    financeSyncService.syncTransactionCreate(newTx).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Transaction Added',
-      description: `${data.description} (₹${data.amount}) recorded successfully.`,
+      description: `${data.description} (₹${data.amount}) recorded and runway recalculated.`,
     });
   }, [showToast]);
 
@@ -209,12 +171,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       transactions: prev.transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     }));
-
-    financeSyncService.syncTransactionUpdate(id, updates).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
 
     showToast({
       type: 'success',
@@ -228,12 +184,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       transactions: prev.transactions.filter((t) => t.id !== id),
     }));
-
-    financeSyncService.syncTransactionDelete(id).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
 
     showToast({
       type: 'info',
@@ -255,12 +205,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savingsGoals: [...prev.savingsGoals, newGoal],
     }));
 
-    financeSyncService.syncGoalCreate(newGoal).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Savings Goal Created',
@@ -274,12 +218,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savingsGoals: prev.savingsGoals.map((g) => (g.id === id ? { ...g, ...updates } : g)),
     }));
 
-    financeSyncService.syncGoalUpdate(id, updates).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Savings Goal Updated',
@@ -292,12 +230,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       savingsGoals: prev.savingsGoals.filter((g) => g.id !== id),
     }));
-
-    financeSyncService.syncGoalDelete(id).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
 
     showToast({
       type: 'info',
@@ -328,12 +260,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ),
     }));
 
-    financeSyncService.syncGoalDeposit(goalId, amount).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Savings Boosted!',
@@ -356,12 +282,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ),
     }));
 
-    financeSyncService.syncGoalWithdraw(goalId, amount).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'info',
       title: 'Funds Released to Cash',
@@ -382,12 +302,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       commitments: [...prev.commitments, newCommitment],
     }));
 
-    financeSyncService.syncCommitmentCreate(newCommitment).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Commitment Added',
@@ -401,12 +315,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       commitments: prev.commitments.map((c) => (c.id === id ? { ...c, ...updates } : c)),
     }));
 
-    financeSyncService.syncCommitmentUpdate(id, updates).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Commitment Updated',
@@ -419,12 +327,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       commitments: prev.commitments.filter((c) => c.id !== id),
     }));
-
-    financeSyncService.syncCommitmentDelete(id).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
 
     showToast({
       type: 'info',
@@ -458,12 +360,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [paidTx, ...prev.transactions],
     }));
 
-    financeSyncService.syncCommitmentPay(id).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
       title: 'Bill Marked as Paid',
@@ -487,12 +383,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         : prev.transactions,
     }));
 
-    financeSyncService.syncCommitmentUnpay(id).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'info',
       title: 'Payment Status Reverted',
@@ -508,12 +398,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       currentDay: nextDay,
     }));
 
-    financeSyncService.syncAdvanceDay().then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'info',
       title: 'Clock Advanced',
@@ -524,12 +408,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setDay = useCallback((day: number) => {
     const clampedDay = Math.min(persisted.totalDays, Math.max(1, day));
     setPersisted((prev) => ({ ...prev, currentDay: clampedDay }));
-
-    financeSyncService.syncSetDay(clampedDay).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
 
     showToast({
       type: 'info',
@@ -542,16 +420,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (budget <= 0) return;
     setPersisted((prev) => ({ ...prev, totalBudget: budget }));
 
-    financeSyncService.syncUpdateBudget(budget).then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
-      title: 'Cycle Budget Updated',
-      description: `Target 30-day budget set to ₹${budget.toLocaleString('en-IN')}.`,
+      title: 'Monthly Budget / Income Updated',
+      description: `30-day total budget set to ₹${budget.toLocaleString('en-IN')}. Daily allowance & health score recalculated!`,
     });
   }, [showToast]);
 
@@ -561,16 +433,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsSimulating(false);
     setSimulationParamsState(DEFAULT_SIMULATION_PARAMS);
 
-    financeSyncService.resetState().then((res) => {
-      if (!res.success && res.error) {
-        showToast({ type: 'warning', title: 'Remote Sync Notice', description: res.error });
-      }
-    });
-
     showToast({
       type: 'success',
-      title: 'Demo Data Restored',
-      description: 'Re-initialized ₹10,000 budget, Day 12 baseline, and clean reconciled figures.',
+      title: 'Sample Data Restored',
+      description: 'Loaded ₹10,000 budget, Day 12 baseline, 14 expenses, 3 savings goals, and 4 bills.',
     });
   }, [showToast]);
 

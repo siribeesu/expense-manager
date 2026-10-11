@@ -161,9 +161,87 @@ export const SAMPLE_TEST_COMMITMENTS: Commitment[] = [
   },
 ];
 
-// Default demo dataset populated with realistic Indian Gen Z finance records
-export const DEMO_TRANSACTIONS: Transaction[] = [...SAMPLE_TEST_TRANSACTIONS];
-export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [...SAMPLE_TEST_GOALS];
+// Full rich mock dataset populated with realistic Indian Gen Z finance records across all categories & days 1..12
+export const DEMO_TRANSACTIONS: Transaction[] = [
+  ...SAMPLE_TEST_TRANSACTIONS,
+  {
+    id: 'tx-mock-day2',
+    description: 'Rapido Bike Taxi & Metro Interchange',
+    amount: 110,
+    category: 'transport',
+    day: 2,
+    dateStr: 'Day 2',
+    type: 'expense',
+    createdAt: Date.now() - 10 * 86400000,
+  },
+  {
+    id: 'tx-mock-day4',
+    description: 'Stationary, Sticky Notes & Exam File',
+    amount: 180,
+    category: 'shopping',
+    day: 4,
+    dateStr: 'Day 4',
+    type: 'expense',
+    createdAt: Date.now() - 8 * 86400000,
+  },
+  {
+    id: 'tx-mock-day6',
+    description: 'PVR Cinemas Friday Movie Ticket',
+    amount: 320,
+    category: 'entertainment',
+    day: 6,
+    dateStr: 'Day 6',
+    type: 'expense',
+    createdAt: Date.now() - 6 * 86400000,
+  },
+  {
+    id: 'tx-mock-day8',
+    description: 'Chai Point & Evening Samosa Break',
+    amount: 90,
+    category: 'food_groceries',
+    day: 8,
+    dateStr: 'Day 8',
+    type: 'expense',
+    createdAt: Date.now() - 4 * 86400000,
+  },
+  {
+    id: 'tx-mock-day10',
+    description: 'Noise ANC Earbuds Silicon Protective Case',
+    amount: 250,
+    category: 'shopping',
+    day: 10,
+    dateStr: 'Day 10',
+    type: 'expense',
+    createdAt: Date.now() - 2 * 86400000 + 3600000,
+  },
+  {
+    id: 'tx-mock-day12',
+    description: 'Spotify Student Premium Shared Plan',
+    amount: 119,
+    category: 'subscriptions',
+    day: 12,
+    dateStr: 'Day 12',
+    type: 'expense',
+    isRecurring: true,
+    createdAt: Date.now() - 1800000,
+  },
+];
+
+export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [
+  ...SAMPLE_TEST_GOALS,
+  {
+    id: 'goal-sample-3',
+    name: 'Mechanical Keyboard & Desk Setup',
+    targetAmount: 2000,
+    currentAmount: 500,
+    targetDay: 30,
+    categoryIcon: 'Laptop',
+    color: '#06B6D4',
+    createdAt: Date.now() - 8 * 86400000,
+    notes: 'Ergonomic coding workstation fund.',
+  },
+];
+
 export const DEMO_COMMITMENTS: Commitment[] = [...SAMPLE_TEST_COMMITMENTS];
 
 export const PRESET_UNEXPECTED_SCENARIOS = [

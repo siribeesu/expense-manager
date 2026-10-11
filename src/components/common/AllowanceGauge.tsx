@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { formatINR } from '../../lib/formatters';
@@ -15,7 +15,7 @@ export interface AllowanceGaugeProps {
   onQuickSpend?: (amount: number, description: string, category: 'food_groceries' | 'transport') => void;
 }
 
-export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
+const AllowanceGaugeComponent: React.FC<AllowanceGaugeProps> = ({
   safeDailyAllowance,
   spentToday,
   remainingDailyAllowanceToday,
@@ -159,3 +159,6 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
     </Card>
   );
 };
+
+export const AllowanceGauge = memo(AllowanceGaugeComponent);
+

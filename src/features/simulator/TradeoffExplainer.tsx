@@ -9,7 +9,7 @@ export interface TradeoffExplainerProps {
   expenseAmount: number;
 }
 
-export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = ({
+export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = React.memo(({
   projection,
   expenseAmount,
 }) => {
@@ -70,4 +70,5 @@ export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = ({
       </div>
     </div>
   );
-};
+});
+TradeoffExplainer.displayName = 'TradeoffExplainer';
