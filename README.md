@@ -116,3 +116,23 @@ Base URL: `http://localhost:3001/api`
 | `/commitments` | `GET`, `POST` | List or register fixed bills |
 | `/commitments/:id/pay` | `POST` | Settle bill (converts to expense atomically) |
 | `/commitments/:id/unpay`| `POST` | Revert paid status |
+
+---
+
+## ☁️ Vercel Deployment Guide
+
+PaisaPilot is fully configured for seamless one-click deployment on **Vercel**:
+
+### Option A: Monorepo / Root Deployment (Recommended)
+1. Push the code to GitHub and import the repository on [Vercel](https://vercel.com).
+2. Leave the **Root Directory** as `./` (default).
+3. Vercel automatically detects `vercel.json`:
+   - Builds the Vite React client from `frontend/` to `frontend/dist`.
+   - Provisions the serverless REST API functions under `api/index.ts`.
+   - Handles client-side SPA routing (`/(.*) -> /index.html`) and API routing (`/api/(.*) -> /api`).
+4. Click **Deploy**!
+
+### Option B: Frontend Single-Workspace Deployment
+If deploying only the `frontend` folder (by setting Root Directory to `frontend`):
+- `frontend/vercel.json` ensures full client-side SPA routing without 404s.
+- The built-in client engine and local persistence seamlessly power the full cockpit and simulation offline!

@@ -75,9 +75,9 @@ const INITIAL_DEMO_DATA: DatabaseSchema = {
   updatedAt: Date.now(),
 };
 
-// Database file path resolution
+// Database file path resolution (uses /tmp in Vercel serverless environment)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'paisapilot_db.json');
 
 export class Database {
