@@ -11,8 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-backend/test/test_db.json
 *.tmp.*
+frontend/
 
 # Editor directories and files
 .vscode/*
