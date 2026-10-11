@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import { useTheme } from '../../context/useTheme';
 
 export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: number;
@@ -22,8 +23,12 @@ export const Slider: React.FC<SliderProps> = ({
   className,
   id,
 }) => {
+  const { theme } = useTheme();
   const sliderId = id || (label ? `slider-${label.toLowerCase().replace(/\s+/g, '-')}` : 'fin-slider');
   const percentage = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+
+  const trackActive = theme === 'dark' ? '#C8FF55' : '#16A34A';
+  const trackInactive = theme === 'dark' ? '#1E293B' : '#E2E8F0';
 
   return (
     <div className="w-full space-y-2">
@@ -49,11 +54,12 @@ export const Slider: React.FC<SliderProps> = ({
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
           className={cn(
-            'w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer focus:outline-none accent-[#C8FF55]',
+            'w-full h-2 rounded-lg appearance-none cursor-pointer focus:outline-none',
+            theme === 'dark' ? 'accent-[#C8FF55]' : 'accent-[#16A34A]',
             className
           )}
           style={{
-            background: `linear-gradient(to right, #C8FF55 ${percentage}%, #1E293B ${percentage}%)`,
+            background: `linear-gradient(to right, ${trackActive} ${percentage}%, ${trackInactive} ${percentage}%)`,
           }}
         />
       </div>
