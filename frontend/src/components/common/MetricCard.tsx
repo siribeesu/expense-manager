@@ -31,7 +31,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Card
       variant={highlight ? 'highlight' : 'default'}
-      className={cn('relative overflow-hidden flex flex-col justify-between p-5', className)}
+      className={cn(
+        'relative overflow-hidden flex flex-col justify-between p-5 transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-700/80 group',
+        className
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-1">

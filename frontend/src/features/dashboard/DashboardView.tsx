@@ -33,7 +33,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
   onOpenAddTransaction,
 }) => {
-  const { metrics, transactions, commitments, isSimulating, simulationProjection } = useFinance();
+  const { metrics, transactions, commitments, isSimulating, simulationProjection, addTransaction } = useFinance();
 
   const recentTransactions = transactions.slice(0, 5);
   const upcomingCommitments = commitments.filter((c) => !c.isPaid).slice(0, 3);
@@ -77,6 +77,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             remainingDays={metrics.remainingDays}
             availableCash={metrics.availableCash}
             isPaceSustainable={metrics.isPaceSustainable}
+            onQuickSpend={(amount, description, category) => {
+              addTransaction({
+                description,
+                amount,
+                category,
+                day: metrics.currentDay,
+                dateStr: `Day ${metrics.currentDay}`,
+                type: 'expense',
+              });
+            }}
           />
         </div>
         <div className="lg:col-span-5">
