@@ -9,6 +9,24 @@ import { calculateFinancialMetrics } from '../engine/accounting';
 import { projectSimulation } from '../engine/forecast';
 import { loadStoredState, saveStoredState, getInitialDemoState } from '../lib/storage';
 import { FinanceContext, type ToastMessage } from './financeContextDef';
+import {
+  checkBackendHealth,
+  fetchBackendState,
+  resetBackendState,
+  createBackendTransaction,
+  updateBackendTransaction,
+  deleteBackendTransaction,
+  createBackendGoal,
+  updateBackendGoal,
+  deleteBackendGoal,
+  depositBackendGoal,
+  withdrawBackendGoal,
+  createBackendCommitment,
+  updateBackendCommitment,
+  deleteBackendCommitment,
+  payBackendCommitment,
+  unpayBackendCommitment,
+} from '../lib/api';
 
 const DEFAULT_SIMULATION_PARAMS: SimulationParams = {
   description: 'Simulated Purchase / Expense',
@@ -23,10 +41,30 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Load initial persistent state
   const [persisted, setPersisted] = useState(() => loadStoredState());
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
 
   // Simulation state (isolated from actual state)
   const [simulationParams, setSimulationParamsState] = useState<SimulationParams>(DEFAULT_SIMULATION_PARAMS);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
+
+  // Check backend health & sync state from backend on mount
+  useEffect(() => {
+    let isMounted = true;
+    checkBackendHealth().then((health) => {
+      if (!isMounted) return;
+      if (health.isOnline) {
+        setIsBackendConnected(true);
+        fetchBackendState().then((backendState) => {
+          if (backendState && isMounted) {
+            setPersisted(backendState);
+          }
+        });
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Sync to localStorage whenever actual data changes
   useEffect(() => {
@@ -132,13 +170,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [newTx, ...prev.transactions],
     }));
 
+    // Sync with backend
+    createBackendTransaction(newTx);
+
     showToast({
       type: 'success',
       title: 'Expense Committed to Actual Records',
       description: `Added ₹${simulationParams.amount} for "${simulationParams.description}". Metrics updated!`,
     });
 
-    // Reset simulation once committed
     setIsSimulating(false);
     setSimulationParamsState(DEFAULT_SIMULATION_PARAMS);
     return true;
@@ -157,6 +197,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [newTx, ...prev.transactions],
     }));
 
+    createBackendTransaction(newTx);
+
     showToast({
       type: 'success',
       title: 'Transaction Added',
@@ -170,6 +212,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: prev.transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     }));
 
+    updateBackendTransaction(id, updates);
+
     showToast({
       type: 'success',
       title: 'Transaction Updated',
@@ -182,6 +226,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       transactions: prev.transactions.filter((t) => t.id !== id),
     }));
+
+    deleteBackendTransaction(id);
 
     showToast({
       type: 'info',
@@ -203,6 +249,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savingsGoals: [...prev.savingsGoals, newGoal],
     }));
 
+    createBackendGoal(newGoal);
+
     showToast({
       type: 'success',
       title: 'Savings Goal Created',
@@ -216,6 +264,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       savingsGoals: prev.savingsGoals.map((g) => (g.id === id ? { ...g, ...updates } : g)),
     }));
 
+    updateBackendGoal(id, updates);
+
     showToast({
       type: 'success',
       title: 'Savings Goal Updated',
@@ -228,6 +278,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       savingsGoals: prev.savingsGoals.filter((g) => g.id !== id),
     }));
+
+    deleteBackendGoal(id);
 
     showToast({
       type: 'info',
@@ -258,6 +310,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ),
     }));
 
+    depositBackendGoal(goalId, amount);
+
     showToast({
       type: 'success',
       title: 'Savings Boosted!',
@@ -280,6 +334,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ),
     }));
 
+    withdrawBackendGoal(goalId, amount);
+
     showToast({
       type: 'info',
       title: 'Funds Released to Cash',
@@ -300,6 +356,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       commitments: [...prev.commitments, newCommitment],
     }));
 
+    createBackendCommitment(newCommitment);
+
     showToast({
       type: 'success',
       title: 'Commitment Added',
@@ -312,6 +370,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...prev,
       commitments: prev.commitments.map((c) => (c.id === id ? { ...c, ...updates } : c)),
     }));
+
+    updateBackendCommitment(id, updates);
 
     showToast({
       type: 'success',
@@ -326,6 +386,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       commitments: prev.commitments.filter((c) => c.id !== id),
     }));
 
+    deleteBackendCommitment(id);
+
     showToast({
       type: 'info',
       title: 'Commitment Removed',
@@ -333,7 +395,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   }, [showToast]);
 
-  // Mark commitment as paid: converts obligation into a recorded transaction seamlessly
   const markCommitmentPaid = useCallback((id: string) => {
     const commitment = persisted.commitments.find((c) => c.id === id);
     if (!commitment || commitment.isPaid) return;
@@ -359,6 +420,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       transactions: [paidTx, ...prev.transactions],
     }));
 
+    payBackendCommitment(id);
+
     showToast({
       type: 'success',
       title: 'Bill Marked as Paid',
@@ -382,6 +445,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         : prev.transactions,
     }));
 
+    unpayBackendCommitment(id);
+
     showToast({
       type: 'info',
       title: 'Payment Status Reverted',
@@ -399,6 +464,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
     });
 
+    fetch('/api/state/advance-day', { method: 'POST' }).catch(() => {});
+
     showToast({
       type: 'info',
       title: 'Clock Advanced',
@@ -409,11 +476,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setDay = useCallback((day: number) => {
     const clampedDay = Math.min(persisted.totalDays, Math.max(1, day));
     setPersisted((prev) => ({ ...prev, currentDay: clampedDay }));
+    fetch('/api/state/day', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ day: clampedDay }),
+    }).catch(() => {});
   }, [persisted.totalDays]);
 
   const setTotalBudget = useCallback((budget: number) => {
     if (budget <= 0) return;
     setPersisted((prev) => ({ ...prev, totalBudget: budget }));
+    fetch('/api/state/budget', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ totalBudget: budget }),
+    }).catch(() => {});
     showToast({
       type: 'success',
       title: 'Budget Adjusted',
@@ -426,6 +503,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPersisted(demo);
     setIsSimulating(false);
     setSimulationParamsState(DEFAULT_SIMULATION_PARAMS);
+
+    resetBackendState();
+
     showToast({
       type: 'success',
       title: 'Demo Data Restored',
@@ -443,6 +523,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         savingsGoals: persisted.savingsGoals,
         commitments: persisted.commitments,
         metrics,
+        isBackendConnected,
         simulationParams,
         simulationProjection,
         isSimulating,

@@ -18,7 +18,7 @@ export interface TopNavbarProps {
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
-  const { currentDay, totalDays, metrics, advanceDay, resetToDemoData } = useFinance();
+  const { currentDay, totalDays, metrics, advanceDay, resetToDemoData, isBackendConnected } = useFinance();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   return (
@@ -57,6 +57,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleSidebar, isSidebar
 
           {/* Quick Stats & Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Live Backend Connection Indicator */}
+            <div
+              title={isBackendConnected ? 'Connected to Node.js Express REST Backend on port 3001' : 'Running on client-side persistent storage'}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-mono select-none"
+            >
+              <span className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
+              <span className={isBackendConnected ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                {isBackendConnected ? 'API :3001' : 'Local DB'}
+              </span>
+            </div>
             {/* Day Indicator with Advance Button */}
             <div className="flex items-center bg-[#131B2F] border border-slate-700/60 rounded-xl p-1 px-2.5 gap-2">
               <div className="text-left">

@@ -67,161 +67,11 @@ export interface DatabaseSchema {
 
 const INITIAL_DEMO_DATA: DatabaseSchema = {
   totalBudget: 10000,
-  currentDay: 12,
+  currentDay: 1,
   totalDays: 30,
-  transactions: [
-    {
-      id: 'tx-1',
-      description: 'Instamart Groceries & Breakfast',
-      amount: 850,
-      category: 'food_groceries',
-      day: 1,
-      dateStr: 'Day 1',
-      type: 'expense',
-      createdAt: Date.now() - 11 * 86400000,
-    },
-    {
-      id: 'tx-2',
-      description: 'Metro SmartCard Top-up',
-      amount: 400,
-      category: 'transport',
-      day: 3,
-      dateStr: 'Day 3',
-      type: 'expense',
-      createdAt: Date.now() - 9 * 86400000,
-    },
-    {
-      id: 'tx-3',
-      description: 'Semester Reference Book & Notes',
-      amount: 620,
-      category: 'education',
-      day: 5,
-      dateStr: 'Day 5',
-      type: 'expense',
-      createdAt: Date.now() - 7 * 86400000,
-    },
-    {
-      id: 'tx-4',
-      description: 'Weekend Biryani with Roommates',
-      amount: 450,
-      category: 'food_groceries',
-      day: 7,
-      dateStr: 'Day 7',
-      type: 'expense',
-      createdAt: Date.now() - 5 * 86400000,
-    },
-    {
-      id: 'tx-5',
-      description: 'Jio 5G Unlimited 1.5GB/day Plan',
-      amount: 299,
-      category: 'bills_utilities',
-      day: 9,
-      dateStr: 'Day 9',
-      type: 'expense',
-      isRecurring: true,
-      createdAt: Date.now() - 3 * 86400000,
-    },
-    {
-      id: 'tx-6',
-      description: 'Cold Brew & Cafe Study Jam',
-      amount: 240,
-      category: 'food_groceries',
-      day: 10,
-      dateStr: 'Day 10',
-      type: 'expense',
-      createdAt: Date.now() - 2 * 86400000,
-    },
-    {
-      id: 'tx-7',
-      description: 'Apollo Pharmacy First Aid & ORS',
-      amount: 180,
-      category: 'health_wellness',
-      day: 11,
-      dateStr: 'Day 11',
-      type: 'expense',
-      createdAt: Date.now() - 1 * 86400000,
-    },
-    {
-      id: 'tx-8',
-      description: 'Quick Kathi Roll Lunch & Chai',
-      amount: 160,
-      category: 'food_groceries',
-      day: 12,
-      dateStr: 'Day 12 (Today)',
-      type: 'expense',
-      createdAt: Date.now(),
-    },
-  ],
-  savingsGoals: [
-    {
-      id: 'goal-1',
-      name: 'Emergency Cushion / Tech Fund',
-      targetAmount: 3000,
-      currentAmount: 1200,
-      targetDay: 30,
-      categoryIcon: 'ShieldCheck',
-      color: '#10B981',
-      createdAt: Date.now() - 12 * 86400000,
-      notes: 'Safe emergency buffer against surprise device repairs or travel needs.',
-    },
-    {
-      id: 'goal-2',
-      name: 'Diwali Gifts & Homecoming',
-      targetAmount: 1500,
-      currentAmount: 300,
-      targetDay: 30,
-      categoryIcon: 'Gift',
-      color: '#C8FF55',
-      createdAt: Date.now() - 10 * 86400000,
-      notes: 'Train ticket reservation and sweets for family.',
-    },
-  ],
-  commitments: [
-    {
-      id: 'com-1',
-      name: 'PG High-Speed WiFi Share',
-      amount: 450,
-      category: 'bills_utilities',
-      dueDay: 15,
-      frequency: 'monthly',
-      isPaid: false,
-      isSubscription: false,
-      serviceProvider: 'Airtel Xstream',
-    },
-    {
-      id: 'com-2',
-      name: 'Spotify Premium Duo',
-      amount: 149,
-      category: 'subscriptions',
-      dueDay: 18,
-      frequency: 'monthly',
-      isPaid: false,
-      isSubscription: true,
-      serviceProvider: 'Spotify India',
-    },
-    {
-      id: 'com-3',
-      name: 'Gym & Fitness Pass Share',
-      amount: 600,
-      category: 'health_wellness',
-      dueDay: 22,
-      frequency: 'monthly',
-      isPaid: false,
-      isSubscription: false,
-      serviceProvider: 'Local Fitness Club',
-    },
-    {
-      id: 'com-4',
-      name: 'Google One 100GB Storage',
-      amount: 199,
-      category: 'subscriptions',
-      dueDay: 25,
-      frequency: 'monthly',
-      isPaid: false,
-      isSubscription: true,
-      serviceProvider: 'Google Services',
-    },
-  ],
+  transactions: [],
+  savingsGoals: [],
+  commitments: [],
   updatedAt: Date.now(),
 };
 
@@ -232,22 +82,25 @@ const DB_FILE = path.join(DATA_DIR, 'paisapilot_db.json');
 
 export class Database {
   private inMemoryCache: DatabaseSchema;
+  private dbFile: string;
 
-  constructor() {
+  constructor(customPath?: string) {
+    this.dbFile = customPath || DB_FILE;
     this.ensureDirectory();
     this.inMemoryCache = this.readFromDisk();
   }
 
   private ensureDirectory(): void {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    const dir = path.dirname(this.dbFile);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
   }
 
   private readFromDisk(): DatabaseSchema {
     try {
-      if (fs.existsSync(DB_FILE)) {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+      if (fs.existsSync(this.dbFile)) {
+        const raw = fs.readFileSync(this.dbFile, 'utf-8');
         return JSON.parse(raw);
       }
     } catch (e) {
@@ -260,9 +113,11 @@ export class Database {
 
   private writeToDisk(data: DatabaseSchema): void {
     this.ensureDirectory();
-    const tempFile = `${DB_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
-    fs.renameSync(tempFile, DB_FILE);
+    try {
+      fs.writeFileSync(this.dbFile, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (e) {
+      console.warn('Failed to persist database to disk:', e);
+    }
   }
 
   private persist(): void {

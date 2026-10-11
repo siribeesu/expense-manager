@@ -123,8 +123,25 @@ export const CommitmentsView: React.FC = () => {
         </div>
 
         {unpaidCommitments.length === 0 ? (
-          <Card className="p-6 text-center text-slate-400 text-xs">
-            No pending commitments left for this 30-day budget period!
+          <Card className="py-10 px-4 text-center space-y-3">
+            <Clock className="w-10 h-10 text-slate-600 mx-auto" />
+            <h4 className="text-sm font-bold text-white">No pending commitments</h4>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              Add your upcoming bills, rent share, or subscriptions to ensure funds are locked in advance.
+            </p>
+            <div className="pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingCommitment(null);
+                  setIsModalOpen(true);
+                }}
+                className="font-bold text-xs"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Bill / Subscription
+              </Button>
+            </div>
           </Card>
         ) : (
           <div className="space-y-2.5">

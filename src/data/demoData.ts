@@ -1,12 +1,18 @@
 import type { Transaction, SavingsGoal, Commitment } from '../types/finance';
 
 export const INITIAL_TOTAL_BUDGET = 10000;
-export const INITIAL_CURRENT_DAY = 12;
+export const INITIAL_CURRENT_DAY = 1;
 export const INITIAL_TOTAL_DAYS = 30;
 
-export const DEMO_TRANSACTIONS: Transaction[] = [
+// Production ready-to-use initial clean state
+export const DEMO_TRANSACTIONS: Transaction[] = [];
+export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [];
+export const DEMO_COMMITMENTS: Commitment[] = [];
+
+// Sample reference dataset for unit tests or optional demonstration loading
+export const SAMPLE_TEST_TRANSACTIONS: Transaction[] = [
   {
-    id: 'tx-1',
+    id: 'tx-sample-1',
     description: 'Instamart Groceries & Breakfast',
     amount: 850,
     category: 'food_groceries',
@@ -16,7 +22,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 11 * 86400000,
   },
   {
-    id: 'tx-2',
+    id: 'tx-sample-2',
     description: 'Metro SmartCard Top-up',
     amount: 400,
     category: 'transport',
@@ -26,7 +32,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 9 * 86400000,
   },
   {
-    id: 'tx-3',
+    id: 'tx-sample-3',
     description: 'Semester Reference Book & Notes',
     amount: 620,
     category: 'education',
@@ -36,7 +42,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 7 * 86400000,
   },
   {
-    id: 'tx-4',
+    id: 'tx-sample-4',
     description: 'Weekend Biryani with Roommates',
     amount: 450,
     category: 'food_groceries',
@@ -46,7 +52,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 5 * 86400000,
   },
   {
-    id: 'tx-5',
+    id: 'tx-sample-5',
     description: 'Jio 5G Unlimited 1.5GB/day Plan',
     amount: 299,
     category: 'bills_utilities',
@@ -57,7 +63,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 3 * 86400000,
   },
   {
-    id: 'tx-6',
+    id: 'tx-sample-6',
     description: 'Cold Brew & Cafe Study Jam',
     amount: 240,
     category: 'food_groceries',
@@ -67,7 +73,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 2 * 86400000,
   },
   {
-    id: 'tx-7',
+    id: 'tx-sample-7',
     description: 'Apollo Pharmacy First Aid & ORS',
     amount: 180,
     category: 'health_wellness',
@@ -77,20 +83,20 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
     createdAt: Date.now() - 1 * 86400000,
   },
   {
-    id: 'tx-8',
+    id: 'tx-sample-8',
     description: 'Quick Kathi Roll Lunch & Chai',
     amount: 160,
     category: 'food_groceries',
     day: 12,
-    dateStr: 'Day 12 (Today)',
+    dateStr: 'Day 12',
     type: 'expense',
     createdAt: Date.now(),
   },
 ];
 
-export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [
+export const SAMPLE_TEST_GOALS: SavingsGoal[] = [
   {
-    id: 'goal-1',
+    id: 'goal-sample-1',
     name: 'Emergency Cushion / Tech Fund',
     targetAmount: 3000,
     currentAmount: 1200,
@@ -98,10 +104,10 @@ export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [
     categoryIcon: 'ShieldCheck',
     color: '#10B981',
     createdAt: Date.now() - 12 * 86400000,
-    notes: 'Safe emergency buffer against surprise device repairs or travel needs.',
+    notes: 'Safe emergency buffer against surprise device repairs.',
   },
   {
-    id: 'goal-2',
+    id: 'goal-sample-2',
     name: 'Diwali Gifts & Homecoming',
     targetAmount: 1500,
     currentAmount: 300,
@@ -109,13 +115,13 @@ export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [
     categoryIcon: 'Gift',
     color: '#C8FF55',
     createdAt: Date.now() - 10 * 86400000,
-    notes: 'Train ticket reservation and sweets for family.',
+    notes: 'Train ticket reservation and gifts for family.',
   },
 ];
 
-export const DEMO_COMMITMENTS: Commitment[] = [
+export const SAMPLE_TEST_COMMITMENTS: Commitment[] = [
   {
-    id: 'com-1',
+    id: 'com-sample-1',
     name: 'PG High-Speed WiFi Share',
     amount: 450,
     category: 'bills_utilities',
@@ -126,7 +132,7 @@ export const DEMO_COMMITMENTS: Commitment[] = [
     serviceProvider: 'Airtel Xstream',
   },
   {
-    id: 'com-2',
+    id: 'com-sample-2',
     name: 'Spotify Premium Duo',
     amount: 149,
     category: 'subscriptions',
@@ -137,7 +143,7 @@ export const DEMO_COMMITMENTS: Commitment[] = [
     serviceProvider: 'Spotify India',
   },
   {
-    id: 'com-3',
+    id: 'com-sample-3',
     name: 'Gym & Fitness Pass Share',
     amount: 600,
     category: 'health_wellness',
@@ -148,7 +154,7 @@ export const DEMO_COMMITMENTS: Commitment[] = [
     serviceProvider: 'Local Fitness Club',
   },
   {
-    id: 'com-4',
+    id: 'com-sample-4',
     name: 'Google One 100GB Storage',
     amount: 199,
     category: 'subscriptions',

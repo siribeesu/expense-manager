@@ -2,21 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { calculateFinancialMetrics } from '../engine/accounting';
 import { projectSimulation } from '../engine/forecast';
 import {
-  INITIAL_TOTAL_BUDGET,
-  INITIAL_CURRENT_DAY,
-  DEMO_TRANSACTIONS,
-  DEMO_SAVINGS_GOALS,
-  DEMO_COMMITMENTS,
+  SAMPLE_TEST_TRANSACTIONS,
+  SAMPLE_TEST_GOALS,
+  SAMPLE_TEST_COMMITMENTS,
 } from '../data/demoData';
 
 describe('PaisaPilot What-If Simulator Engine', () => {
   const baseMetrics = calculateFinancialMetrics({
-    totalBudget: INITIAL_TOTAL_BUDGET,
-    currentDay: INITIAL_CURRENT_DAY,
+    totalBudget: 10000,
+    currentDay: 12,
     totalDays: 30,
-    transactions: DEMO_TRANSACTIONS,
-    savingsGoals: DEMO_SAVINGS_GOALS,
-    commitments: DEMO_COMMITMENTS,
+    transactions: SAMPLE_TEST_TRANSACTIONS,
+    savingsGoals: SAMPLE_TEST_GOALS,
+    commitments: SAMPLE_TEST_COMMITMENTS,
   });
 
   it('calculates simulation deltas without mutating baseline state', () => {
@@ -33,8 +31,8 @@ describe('PaisaPilot What-If Simulator Engine', () => {
         delayDays: 0,
         isRecurring: false,
       },
-      DEMO_SAVINGS_GOALS,
-      DEMO_COMMITMENTS
+      SAMPLE_TEST_GOALS,
+      SAMPLE_TEST_COMMITMENTS
     );
 
     // Baseline metrics must be completely untouched
@@ -63,8 +61,8 @@ describe('PaisaPilot What-If Simulator Engine', () => {
         delayDays: 0,
         isRecurring: false,
       },
-      DEMO_SAVINGS_GOALS,
-      DEMO_COMMITMENTS
+      SAMPLE_TEST_GOALS,
+      SAMPLE_TEST_COMMITMENTS
     );
 
     expect(projection.affordabilityStatus).toBe('unaffordable');
@@ -86,8 +84,8 @@ describe('PaisaPilot What-If Simulator Engine', () => {
         delayDays: 0,
         isRecurring: false,
       },
-      DEMO_SAVINGS_GOALS,
-      DEMO_COMMITMENTS
+      SAMPLE_TEST_GOALS,
+      SAMPLE_TEST_COMMITMENTS
     );
 
     expect(projection.affordabilityStatus).toBe('tight');

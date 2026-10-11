@@ -6,10 +6,13 @@ import {
   DEMO_TRANSACTIONS,
   DEMO_SAVINGS_GOALS,
   DEMO_COMMITMENTS,
+  SAMPLE_TEST_TRANSACTIONS,
+  SAMPLE_TEST_GOALS,
+  SAMPLE_TEST_COMMITMENTS,
 } from '../data/demoData';
 
 describe('PaisaPilot Financial Accounting Engine', () => {
-  it('correctly reconciles the initial demo financial state', () => {
+  it('correctly initializes the pristine Day 1 ready-to-use production baseline', () => {
     const metrics = calculateFinancialMetrics({
       totalBudget: INITIAL_TOTAL_BUDGET,
       currentDay: INITIAL_CURRENT_DAY,
@@ -17,6 +20,30 @@ describe('PaisaPilot Financial Accounting Engine', () => {
       transactions: DEMO_TRANSACTIONS,
       savingsGoals: DEMO_SAVINGS_GOALS,
       commitments: DEMO_COMMITMENTS,
+    });
+
+    // Pristine day 1 values
+    expect(metrics.totalBudget).toBe(10000);
+    expect(metrics.currentDay).toBe(1);
+    expect(metrics.remainingDays).toBe(30);
+    expect(metrics.totalSpent).toBe(0);
+    expect(metrics.spentToday).toBe(0);
+    expect(metrics.reservedSavings).toBe(0);
+    expect(metrics.reservedCommitments).toBe(0);
+    expect(metrics.availableCash).toBe(10000);
+    expect(metrics.safeDailyAllowance).toBe(333); // Math.floor(10000 / 30) = 333
+    expect(metrics.remainingDailyAllowanceToday).toBe(333);
+    expect(metrics.health.totalScore).toBeGreaterThanOrEqual(90);
+  });
+
+  it('correctly reconciles realistic financial state with test fixture data', () => {
+    const metrics = calculateFinancialMetrics({
+      totalBudget: 10000,
+      currentDay: 12,
+      totalDays: 30,
+      transactions: SAMPLE_TEST_TRANSACTIONS,
+      savingsGoals: SAMPLE_TEST_GOALS,
+      commitments: SAMPLE_TEST_COMMITMENTS,
     });
 
     // 1. Budget reconciliation
@@ -28,12 +55,12 @@ describe('PaisaPilot Financial Accounting Engine', () => {
     expect(metrics.totalSpent).toBe(3199);
     expect(metrics.spentToday).toBe(160);
 
-    // 3. Goal reserves: Goal 1 (1200) + Goal 2 (300) (wait, let's check DEMO_SAVINGS_GOALS in demoData)
-    const expectedReservedSavings = DEMO_SAVINGS_GOALS.reduce((s, g) => s + g.currentAmount, 0);
+    // 3. Goal reserves: Goal 1 (1200) + Goal 2 (300) = 1500
+    const expectedReservedSavings = SAMPLE_TEST_GOALS.reduce((s, g) => s + g.currentAmount, 0);
     expect(metrics.reservedSavings).toBe(expectedReservedSavings);
 
     // 4. Commitment reserves: Unpaid future commitments
-    const expectedCommitments = DEMO_COMMITMENTS
+    const expectedCommitments = SAMPLE_TEST_COMMITMENTS
       .filter((c) => !c.isPaid && c.dueDay >= 12)
       .reduce((s, c) => s + c.amount, 0);
     expect(metrics.reservedCommitments).toBe(expectedCommitments);
@@ -55,15 +82,15 @@ describe('PaisaPilot Financial Accounting Engine', () => {
   it('prevents double-counting when a commitment is marked as paid', () => {
     // When a commitment (e.g. WiFi ₹450) transitions to paid:
     // It should NO LONGER be in reservedCommitments, and instead is in totalSpent
-    const unpaidCommitments = [...DEMO_COMMITMENTS];
-    const target = unpaidCommitments[0]; // com-1, amount: 450
+    const unpaidCommitments = [...SAMPLE_TEST_COMMITMENTS];
+    const target = unpaidCommitments[0]; // com-sample-1, amount: 450
 
     const beforeMetrics = calculateFinancialMetrics({
       totalBudget: 10000,
       currentDay: 12,
       totalDays: 30,
-      transactions: DEMO_TRANSACTIONS,
-      savingsGoals: DEMO_SAVINGS_GOALS,
+      transactions: SAMPLE_TEST_TRANSACTIONS,
+      savingsGoals: SAMPLE_TEST_GOALS,
       commitments: unpaidCommitments,
     });
 
@@ -86,8 +113,8 @@ describe('PaisaPilot Financial Accounting Engine', () => {
       totalBudget: 10000,
       currentDay: 12,
       totalDays: 30,
-      transactions: [paidTx, ...DEMO_TRANSACTIONS],
-      savingsGoals: DEMO_SAVINGS_GOALS,
+      transactions: [paidTx, ...SAMPLE_TEST_TRANSACTIONS],
+      savingsGoals: SAMPLE_TEST_GOALS,
       commitments: updatedCommitments,
     });
 
