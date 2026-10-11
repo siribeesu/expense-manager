@@ -12,6 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import type { DayForecastPoint } from '../../types/finance';
 import { formatINR } from '../../lib/formatters';
+import { useTheme } from '../../context/useTheme';
 
 export interface ForecastChartProps {
   forecastData: DayForecastPoint[];
@@ -24,6 +25,8 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
   currentDay,
   totalBudget,
 }) => {
+  const { theme } = useTheme();
+
   return (
     <Card className="flex flex-col justify-between p-5">
       <CardHeader className="mb-2">
@@ -51,20 +54,20 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
       <div className="h-64 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={forecastData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1E293B' : '#E2E8F0'} vertical={false} />
             <XAxis
               dataKey="day"
-              stroke="#64748B"
+              stroke={theme === 'dark' ? '#64748B' : '#94A3B8'}
               fontSize={11}
               tickLine={false}
               tickFormatter={(d) => `D${d}`}
-              axisLine={{ stroke: '#1E293B' }}
+              axisLine={{ stroke: theme === 'dark' ? '#1E293B' : '#E2E8F0' }}
             />
             <YAxis
-              stroke="#64748B"
+              stroke={theme === 'dark' ? '#64748B' : '#94A3B8'}
               fontSize={11}
               tickLine={false}
-              axisLine={{ stroke: '#1E293B' }}
+              axisLine={{ stroke: theme === 'dark' ? '#1E293B' : '#E2E8F0' }}
               tickFormatter={(v) => `₹${v}`}
               domain={[0, totalBudget + 1000]}
             />

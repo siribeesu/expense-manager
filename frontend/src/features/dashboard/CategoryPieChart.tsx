@@ -3,6 +3,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import type { TransactionCategory } from '../../types/finance';
 import { formatINR, formatPercent, getCategoryMeta } from '../../lib/formatters';
+import { useTheme } from '../../context/useTheme';
 
 export interface CategoryPieChartProps {
   categoryTotals: Record<TransactionCategory, number>;
@@ -10,6 +11,7 @@ export interface CategoryPieChartProps {
 }
 
 export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ categoryTotals, totalSpent }) => {
+  const { theme } = useTheme();
   const chartData = (Object.keys(categoryTotals) as TransactionCategory[])
     .filter((cat) => categoryTotals[cat] > 0)
     .map((cat) => {
@@ -64,7 +66,7 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ categoryTota
                   outerRadius={80}
                   paddingAngle={3}
                   dataKey="value"
-                  stroke="#0B1020"
+                  stroke={theme === 'dark' ? '#0B1020' : '#FFFFFF'}
                   strokeWidth={2}
                 >
                   {chartData.map((entry, index) => (

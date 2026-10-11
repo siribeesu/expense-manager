@@ -10,7 +10,10 @@ import {
   Wallet,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '../../context/useTheme';
 
 export interface TopNavbarProps {
   onToggleSidebar?: () => void;
@@ -19,12 +22,13 @@ export interface TopNavbarProps {
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const { currentDay, totalDays, metrics, advanceDay, resetToDemoData, isBackendConnected } = useFinance();
+  const { theme, toggleTheme } = useTheme();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#0B1020]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3">
-        <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
+      <header className="sticky top-0 z-40 w-full bg-[#0B1020]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3 transition-colors duration-200">
+        <div className="flex items-center justify-between gap-4 w-full max-w-[1720px] mx-auto">
           {/* Brand Logo & Tagline */}
           <div className="flex items-center gap-3">
             <button
@@ -98,6 +102,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleSidebar, isSidebar
                 </span>
               </div>
             </div>
+
+            {/* Theme Toggle Button (Dark / Light) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-2 rounded-xl bg-[#131B2F] border border-slate-700/60 text-slate-300 hover:text-white hover:border-slate-500 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-300 transition-transform hover:rotate-45" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500 transition-transform hover:-rotate-12" />
+              )}
+            </button>
 
             {/* Reset Demo State Button */}
             <Button

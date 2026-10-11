@@ -1,11 +1,14 @@
+import { ThemeProvider } from './context/ThemeContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { AppLayout } from './components/layout/AppLayout';
 
 export function App() {
   return (
-    <FinanceProvider>
-      <AppLayout />
-    </FinanceProvider>
+    <ThemeProvider>
+      <FinanceProvider>
+        <AppLayout />
+      </FinanceProvider>
+    </ThemeProvider>
   );
 }
 

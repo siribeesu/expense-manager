@@ -27,7 +27,7 @@ export const AppLayout: React.FC = () => {
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
 
-      <div className="flex-1 flex max-w-7xl w-full mx-auto">
+      <div className="flex-1 flex w-full">
         {/* Desktop Sidebar & Mobile Drawer */}
         <Sidebar
           activeTab={activeTab}
@@ -43,34 +43,36 @@ export const AppLayout: React.FC = () => {
         {/* Main Content Area */}
         <main
           id="main-content"
-          className="flex-1 lg:pl-64 px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 w-full transition-all duration-150"
+          className="flex-1 lg:pl-64 w-full transition-all duration-150"
         >
-          {activeTab === 'overview' && (
-            <DashboardView
-              onNavigate={(tab) => {
-                setActiveTab(tab);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              onOpenAddTransaction={() => setIsQuickAddOpen(true)}
-            />
-          )}
+          <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto">
+            {activeTab === 'overview' && (
+              <DashboardView
+                onNavigate={(tab) => {
+                  setActiveTab(tab);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onOpenAddTransaction={() => setIsQuickAddOpen(true)}
+              />
+            )}
 
-          {activeTab === 'simulator' && <SimulatorView />}
+            {activeTab === 'simulator' && <SimulatorView />}
 
-          {activeTab === 'transactions' && <TransactionsView />}
+            {activeTab === 'transactions' && <TransactionsView />}
 
-          {activeTab === 'goals' && <GoalsView />}
+            {activeTab === 'goals' && <GoalsView />}
 
-          {activeTab === 'commitments' && <CommitmentsView />}
+            {activeTab === 'commitments' && <CommitmentsView />}
 
-          {activeTab === 'insights' && (
-            <InsightsView
-              onNavigate={(tab) => {
-                setActiveTab(tab);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            />
-          )}
+            {activeTab === 'insights' && (
+              <InsightsView
+                onNavigate={(tab) => {
+                  setActiveTab(tab);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            )}
+          </div>
         </main>
       </div>
 

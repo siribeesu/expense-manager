@@ -8,8 +8,11 @@ import {
   PiggyBank,
   CalendarClock,
   LineChart,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useTheme } from '../../context/useTheme';
 
 export type ActiveTab = 'overview' | 'simulator' | 'transactions' | 'goals' | 'commitments' | 'insights';
 
@@ -22,6 +25,7 @@ export interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { metrics, isSimulating } = useFinance();
+  const { theme, toggleTheme } = useTheme();
 
   const navItems: { id: ActiveTab; label: string; icon: React.ElementType; badge?: string; isHighlight?: boolean }[] = [
     {
@@ -138,8 +142,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
           </div>
         </div>
 
-        {/* Budget Allocation Widget at bottom */}
-        <div className="p-3.5 rounded-2xl bg-[#131B2F] border border-slate-800/80 space-y-2.5">
+        <div className="space-y-3">
+          {/* Theme Appearance Selector */}
+          <div className="p-2.5 rounded-xl bg-[#131B2F] border border-slate-800/80 flex items-center justify-between text-xs transition-colors">
+            <span className="text-slate-400 font-medium flex items-center gap-2">
+              {theme === 'dark' ? <Moon className="w-3.5 h-3.5 text-indigo-400" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
+              Appearance
+            </span>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 font-semibold text-slate-200 transition-colors cursor-pointer text-[11px] flex items-center gap-1.5"
+            >
+              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+            </button>
+          </div>
+
+          {/* Budget Allocation Widget at bottom */}
+          <div className="p-3.5 rounded-2xl bg-[#131B2F] border border-slate-800/80 space-y-2.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Monthly Allocation</span>
             <span className="font-mono font-bold text-white">
@@ -159,7 +179,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
             <span className="text-emerald-400 font-semibold">{formatINR(metrics.availableCash)} free</span>
           </div>
         </div>
-      </aside>
+      </div>
+    </aside>
     </>
   );
 };
