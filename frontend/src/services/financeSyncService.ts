@@ -26,6 +26,7 @@ import {
   payBackendCommitment,
   unpayBackendCommitment,
   getStoredAuthToken,
+  getLastApiError,
 } from '../lib/api';
 
 export interface SyncResponse<T = void> {
@@ -39,6 +40,24 @@ const API_BASE = (import.meta as any).env?.VITE_API_URL || '/api';
 
 export class FinanceSyncService {
   private isOnline = false;
+
+  private formatSyncErrorMessage(defaultMsg: string): string {
+    const lastErr = getLastApiError();
+    if (!lastErr) return defaultMsg;
+    if (lastErr.status === 401) {
+      return `${defaultMsg} (Authentication failure (401): Session expired or invalid security token. Re-authenticate to resume cloud synchronization.)`;
+    }
+    if (lastErr.status === 400 || lastErr.status === 422) {
+      return `${defaultMsg} (Validation error (${lastErr.status}): ${lastErr.message || 'Payload rejected by remote schema'}).`;
+    }
+    if (lastErr.status === 404) {
+      return `${defaultMsg} (Resource not found (404): The requested item does not exist on the remote database.)`;
+    }
+    if (lastErr.status === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      return `${defaultMsg} (Network offline: Backend unreachable. Changes safely preserved in local encrypted vault.)`;
+    }
+    return `${defaultMsg} (${lastErr.status ? `HTTP ${lastErr.status}: ` : ''}${lastErr.message || 'Unknown network error'})`;
+  }
 
   public async checkHealth(): Promise<boolean> {
     const health = await checkBackendHealth();
@@ -70,7 +89,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Backend reset failed. State was reset in local vault only.',
+      error: this.formatSyncErrorMessage('Backend reset failed. State was reset in local vault only.'),
     };
   }
 
@@ -87,7 +106,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync transaction with remote database. Saved in local secure vault.',
+      error: this.formatSyncErrorMessage('Could not sync transaction with remote database. Saved in local secure vault.'),
     };
   }
 
@@ -105,7 +124,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync transaction updates with remote database. Updated locally.',
+      error: this.formatSyncErrorMessage('Could not sync transaction updates with remote database. Updated locally.'),
     };
   }
 
@@ -120,7 +139,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not delete transaction on remote server. Deleted locally.',
+      error: this.formatSyncErrorMessage('Could not delete transaction on remote server. Deleted locally.'),
     };
   }
 
@@ -137,7 +156,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync savings goal with remote database. Saved locally.',
+      error: this.formatSyncErrorMessage('Could not sync savings goal with remote database. Saved locally.'),
     };
   }
 
@@ -155,7 +174,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync goal changes with remote database. Updated locally.',
+      error: this.formatSyncErrorMessage('Could not sync goal changes with remote database. Updated locally.'),
     };
   }
 
@@ -170,7 +189,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not delete goal on remote server. Deleted locally.',
+      error: this.formatSyncErrorMessage('Could not delete goal on remote server. Deleted locally.'),
     };
   }
 
@@ -185,7 +204,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync goal deposit with remote server. Recorded locally.',
+      error: this.formatSyncErrorMessage('Could not sync goal deposit with remote server. Recorded locally.'),
     };
   }
 
@@ -200,7 +219,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync goal withdrawal with remote server. Recorded locally.',
+      error: this.formatSyncErrorMessage('Could not sync goal withdrawal with remote server. Recorded locally.'),
     };
   }
 
@@ -217,7 +236,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync commitment with remote database. Saved locally.',
+      error: this.formatSyncErrorMessage('Could not sync commitment with remote database. Saved locally.'),
     };
   }
 
@@ -235,7 +254,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync commitment updates with remote database. Saved locally.',
+      error: this.formatSyncErrorMessage('Could not sync commitment updates with remote database. Saved locally.'),
     };
   }
 
@@ -250,7 +269,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not delete commitment on remote server. Deleted locally.',
+      error: this.formatSyncErrorMessage('Could not delete commitment on remote server. Deleted locally.'),
     };
   }
 
@@ -267,7 +286,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not sync bill payment atomically on remote database. Settled locally.',
+      error: this.formatSyncErrorMessage('Could not sync bill payment atomically on remote database. Settled locally.'),
     };
   }
 
@@ -282,7 +301,7 @@ export class FinanceSyncService {
     return {
       success: false,
       syncedToBackend: false,
-      error: 'Could not revert payment on remote database. Reverted locally.',
+      error: this.formatSyncErrorMessage('Could not revert payment on remote database. Reverted locally.'),
     };
   }
 

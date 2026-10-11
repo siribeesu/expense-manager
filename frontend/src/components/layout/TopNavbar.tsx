@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../context/useTheme';
 
+import { cn } from '../../lib/utils';
+
 export interface TopNavbarProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
@@ -28,7 +30,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onOpenCommandPalette,
   onOpenShortcuts,
 }) => {
-  const { currentDay, totalDays, metrics, advanceDay, resetToDemoData } = useFinance();
+  const { currentDay, totalDays, metrics, advanceDay, resetToDemoData, isBackendConnected } = useFinance();
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -74,6 +76,37 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </kbd>
           </button>
         )}
+
+        {/* Sync / Offline Vault Status Badge */}
+        <div
+          role="status"
+          aria-live="polite"
+          className={cn(
+            'hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+            isBackendConnected
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+          )}
+          title={
+            isBackendConnected
+              ? 'Live Cloud Synchronization Active · Remote Database Connected'
+              : 'Offline Mode · Financial records encrypted in local vault'
+          }
+        >
+          <span
+            className={cn(
+              'w-2 h-2 rounded-full shrink-0',
+              isBackendConnected
+                ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse'
+                : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
+            )}
+            aria-hidden="true"
+          />
+          <span>{isBackendConnected ? 'Cloud Synced' : 'Offline · Encrypted Vault'}</span>
+          <span className="sr-only">
+            {isBackendConnected ? 'Cloud synchronization is active' : 'Offline mode, ledger saved to encrypted vault'}
+          </span>
+        </div>
 
         {/* Quick Stats & Controls */}
         <div className="flex items-center gap-2 sm:gap-2.5">

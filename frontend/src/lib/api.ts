@@ -63,6 +63,42 @@ function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<strin
   };
 }
 
+export interface ApiErrorInfo {
+  status?: number;
+  message?: string;
+}
+
+let lastApiError: ApiErrorInfo | null = null;
+
+export function getLastApiError(): ApiErrorInfo | null {
+  return lastApiError;
+}
+
+export function recordApiError(status?: number, message?: string): void {
+  lastApiError = { status, message };
+}
+
+export function clearLastApiError(): void {
+  lastApiError = null;
+}
+
+export async function recordHttpFailure(res: Response): Promise<void> {
+  let message = res.statusText || `HTTP ${res.status}`;
+  try {
+    const json = await res.json();
+    if (json && (json.message || json.error)) {
+      message = json.message || json.error;
+    }
+  } catch {}
+  recordApiError(res.status, message);
+}
+
+export function recordNetworkFailure(err: any): void {
+  const isTimeout = err?.name === 'TimeoutError' || (err?.message && String(err.message).toLowerCase().includes('timeout'));
+  const msg = isTimeout ? 'Request timed out' : (err?.message || 'Network offline or unreachable');
+  recordApiError(0, msg);
+}
+
 /**
  * Health check endpoint
  */
@@ -133,24 +169,47 @@ export async function verifyAuthSession(): Promise<boolean> {
 }
 
 /**
+ * Core authenticated API request dispatcher with timeout and error tracking
+ */
+async function authApiFetch(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<{ ok: boolean; status: number; data?: any; error?: string }> {
+  try {
+    const headers = getAuthHeaders((options.headers as Record<string, string>) || {});
+    const timeoutMs = options.method === 'GET' ? API_TIMEOUTS.STATE_FETCH : API_TIMEOUTS.MUTATION;
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+      signal: options.signal || AbortSignal.timeout(timeoutMs),
+    });
+
+    if (res.ok) {
+      clearLastApiError();
+      const data = await res.json().catch(() => null);
+      return { ok: true, status: res.status, data };
+    }
+
+    await recordHttpFailure(res);
+    return { ok: false, status: res.status, error: lastApiError?.message };
+  } catch (err: any) {
+    recordNetworkFailure(err);
+    console.warn(`[Thriftly API] Request error for ${endpoint}:`, err);
+    return { ok: false, status: 0, error: lastApiError?.message };
+  }
+}
+
+/**
  * Fetches complete financial ledger state from backend
  */
 export async function fetchBackendState(): Promise<AppStoredState | null> {
-  try {
-    const res = await fetch(`${API_BASE}/state`, {
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.STATE_FETCH),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = AppStoredStateSchema.safeParse(data);
-      if (validation.success) {
-        return validation.data as AppStoredState;
-      }
-      console.warn('[Thriftly API] Received invalid schema from backend state:', validation.error);
+  const res = await authApiFetch('/state', { method: 'GET' });
+  if (res.ok && res.data) {
+    const validation = AppStoredStateSchema.safeParse(res.data);
+    if (validation.success) {
+      return validation.data as AppStoredState;
     }
-  } catch (err) {
-    console.warn('[Thriftly API] Falling back to local persistence:', err);
+    console.warn('[Thriftly API] Received invalid schema from backend state:', validation.error);
   }
   return null;
 }
@@ -159,21 +218,12 @@ export async function fetchBackendState(): Promise<AppStoredState | null> {
  * Resets backend database ledger to Day 1 baseline
  */
 export async function resetBackendState(): Promise<AppStoredState | null> {
-  try {
-    const res = await fetch(`${API_BASE}/state/reset`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = AppStoredStateSchema.safeParse(data.state);
-      if (validation.success) {
-        return validation.data as AppStoredState;
-      }
+  const res = await authApiFetch('/state/reset', { method: 'POST' });
+  if (res.ok && res.data?.state) {
+    const validation = AppStoredStateSchema.safeParse(res.data.state);
+    if (validation.success) {
+      return validation.data as AppStoredState;
     }
-  } catch (err) {
-    console.warn('[Thriftly API] Reset error:', err);
   }
   return null;
 }
@@ -184,27 +234,21 @@ export async function resetBackendState(): Promise<AppStoredState | null> {
 export async function createBackendTransaction(
   tx: Omit<Transaction, 'id' | 'createdAt'>
 ): Promise<Transaction | null> {
-  try {
-    const sanitizedTx = {
-      ...tx,
-      description: sanitizeText(tx.description),
-      notes: tx.notes ? sanitizeText(tx.notes) : undefined,
-    };
-    const res = await fetch(`${API_BASE}/transactions`, {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedTx),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = TransactionSchema.safeParse(data.transaction);
-      if (validation.success) {
-        return validation.data as Transaction;
-      }
+  const sanitizedTx = {
+    ...tx,
+    description: sanitizeText(tx.description),
+    notes: tx.notes ? sanitizeText(tx.notes) : undefined,
+  };
+  const res = await authApiFetch('/transactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedTx),
+  });
+  if (res.ok && res.data?.transaction) {
+    const validation = TransactionSchema.safeParse(res.data.transaction);
+    if (validation.success) {
+      return validation.data as Transaction;
     }
-  } catch (err) {
-    console.warn('[Thriftly API] Create transaction error:', err);
   }
   return null;
 }
@@ -216,27 +260,21 @@ export async function updateBackendTransaction(
   id: string,
   updates: Partial<Transaction>
 ): Promise<Transaction | null> {
-  try {
-    const sanitizedUpdates = {
-      ...updates,
-      ...(updates.description ? { description: sanitizeText(updates.description) } : {}),
-      ...(updates.notes ? { notes: sanitizeText(updates.notes) } : {}),
-    };
-    const res = await fetch(`${API_BASE}/transactions/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedUpdates),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = TransactionSchema.safeParse(data.transaction);
-      if (validation.success) {
-        return validation.data as Transaction;
-      }
+  const sanitizedUpdates = {
+    ...updates,
+    ...(updates.description ? { description: sanitizeText(updates.description) } : {}),
+    ...(updates.notes ? { notes: sanitizeText(updates.notes) } : {}),
+  };
+  const res = await authApiFetch(`/transactions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedUpdates),
+  });
+  if (res.ok && res.data?.transaction) {
+    const validation = TransactionSchema.safeParse(res.data.transaction);
+    if (validation.success) {
+      return validation.data as Transaction;
     }
-  } catch (err) {
-    console.warn('[Thriftly API] Update transaction error:', err);
   }
   return null;
 }
@@ -245,16 +283,10 @@ export async function updateBackendTransaction(
  * Deletes a transaction on the backend
  */
 export async function deleteBackendTransaction(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/transactions/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  const res = await authApiFetch(`/transactions/${id}`, {
+    method: 'DELETE',
+  });
+  return res.ok;
 }
 
 /**
@@ -263,27 +295,21 @@ export async function deleteBackendTransaction(id: string): Promise<boolean> {
 export async function createBackendGoal(
   goal: Omit<SavingsGoal, 'id' | 'createdAt'>
 ): Promise<SavingsGoal | null> {
-  try {
-    const sanitizedGoal = {
-      ...goal,
-      name: sanitizeText(goal.name),
-      notes: goal.notes ? sanitizeText(goal.notes) : undefined,
-    };
-    const res = await fetch(`${API_BASE}/goals`, {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedGoal),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = SavingsGoalSchema.safeParse(data.goal);
-      if (validation.success) {
-        return validation.data as SavingsGoal;
-      }
+  const sanitizedGoal = {
+    ...goal,
+    name: sanitizeText(goal.name),
+    notes: goal.notes ? sanitizeText(goal.notes) : undefined,
+  };
+  const res = await authApiFetch('/goals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedGoal),
+  });
+  if (res.ok && res.data?.goal) {
+    const validation = SavingsGoalSchema.safeParse(res.data.goal);
+    if (validation.success) {
+      return validation.data as SavingsGoal;
     }
-  } catch (err) {
-    console.warn('[Thriftly API] Create goal error:', err);
   }
   return null;
 }
@@ -295,27 +321,21 @@ export async function updateBackendGoal(
   id: string,
   updates: Partial<SavingsGoal>
 ): Promise<SavingsGoal | null> {
-  try {
-    const sanitizedUpdates = {
-      ...updates,
-      ...(updates.name ? { name: sanitizeText(updates.name) } : {}),
-      ...(updates.notes ? { notes: sanitizeText(updates.notes) } : {}),
-    };
-    const res = await fetch(`${API_BASE}/goals/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedUpdates),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = SavingsGoalSchema.safeParse(data.goal);
-      if (validation.success) {
-        return validation.data as SavingsGoal;
-      }
+  const sanitizedUpdates = {
+    ...updates,
+    ...(updates.name ? { name: sanitizeText(updates.name) } : {}),
+    ...(updates.notes ? { notes: sanitizeText(updates.notes) } : {}),
+  };
+  const res = await authApiFetch(`/goals/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedUpdates),
+  });
+  if (res.ok && res.data?.goal) {
+    const validation = SavingsGoalSchema.safeParse(res.data.goal);
+    if (validation.success) {
+      return validation.data as SavingsGoal;
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -324,38 +344,26 @@ export async function updateBackendGoal(
  * Deletes a savings goal on the backend
  */
 export async function deleteBackendGoal(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/goals/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  const res = await authApiFetch(`/goals/${id}`, {
+    method: 'DELETE',
+  });
+  return res.ok;
 }
 
 /**
  * Deposits cash into a savings goal on the backend
  */
 export async function depositBackendGoal(id: string, amount: number): Promise<SavingsGoal | null> {
-  try {
-    const res = await fetch(`${API_BASE}/goals/${id}/deposit`, {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ amount }),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = SavingsGoalSchema.safeParse(data.goal);
-      if (validation.success) {
-        return validation.data as SavingsGoal;
-      }
+  const res = await authApiFetch(`/goals/${id}/deposit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount }),
+  });
+  if (res.ok && res.data?.goal) {
+    const validation = SavingsGoalSchema.safeParse(res.data.goal);
+    if (validation.success) {
+      return validation.data as SavingsGoal;
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -364,22 +372,16 @@ export async function depositBackendGoal(id: string, amount: number): Promise<Sa
  * Withdraws cash from a savings goal on the backend
  */
 export async function withdrawBackendGoal(id: string, amount: number): Promise<SavingsGoal | null> {
-  try {
-    const res = await fetch(`${API_BASE}/goals/${id}/withdraw`, {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ amount }),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = SavingsGoalSchema.safeParse(data.goal);
-      if (validation.success) {
-        return validation.data as SavingsGoal;
-      }
+  const res = await authApiFetch(`/goals/${id}/withdraw`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount }),
+  });
+  if (res.ok && res.data?.goal) {
+    const validation = SavingsGoalSchema.safeParse(res.data.goal);
+    if (validation.success) {
+      return validation.data as SavingsGoal;
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -390,27 +392,21 @@ export async function withdrawBackendGoal(id: string, amount: number): Promise<S
 export async function createBackendCommitment(
   commitment: Omit<Commitment, 'id'>
 ): Promise<Commitment | null> {
-  try {
-    const sanitizedCommitment = {
-      ...commitment,
-      name: sanitizeText(commitment.name),
-      serviceProvider: commitment.serviceProvider ? sanitizeText(commitment.serviceProvider) : undefined,
-    };
-    const res = await fetch(`${API_BASE}/commitments`, {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedCommitment),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = CommitmentSchema.safeParse(data.commitment);
-      if (validation.success) {
-        return validation.data as Commitment;
-      }
+  const sanitizedCommitment = {
+    ...commitment,
+    name: sanitizeText(commitment.name),
+    serviceProvider: commitment.serviceProvider ? sanitizeText(commitment.serviceProvider) : undefined,
+  };
+  const res = await authApiFetch('/commitments', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedCommitment),
+  });
+  if (res.ok && res.data?.commitment) {
+    const validation = CommitmentSchema.safeParse(res.data.commitment);
+    if (validation.success) {
+      return validation.data as Commitment;
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -422,27 +418,21 @@ export async function updateBackendCommitment(
   id: string,
   updates: Partial<Commitment>
 ): Promise<Commitment | null> {
-  try {
-    const sanitizedUpdates = {
-      ...updates,
-      ...(updates.name ? { name: sanitizeText(updates.name) } : {}),
-      ...(updates.serviceProvider ? { serviceProvider: sanitizeText(updates.serviceProvider) } : {}),
-    };
-    const res = await fetch(`${API_BASE}/commitments/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(sanitizedUpdates),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = CommitmentSchema.safeParse(data.commitment);
-      if (validation.success) {
-        return validation.data as Commitment;
-      }
+  const sanitizedUpdates = {
+    ...updates,
+    ...(updates.name ? { name: sanitizeText(updates.name) } : {}),
+    ...(updates.serviceProvider ? { serviceProvider: sanitizeText(updates.serviceProvider) } : {}),
+  };
+  const res = await authApiFetch(`/commitments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sanitizedUpdates),
+  });
+  if (res.ok && res.data?.commitment) {
+    const validation = CommitmentSchema.safeParse(res.data.commitment);
+    if (validation.success) {
+      return validation.data as Commitment;
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -451,16 +441,10 @@ export async function updateBackendCommitment(
  * Deletes a commitment on the backend
  */
 export async function deleteBackendCommitment(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/commitments/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  const res = await authApiFetch(`/commitments/${id}`, {
+    method: 'DELETE',
+  });
+  return res.ok;
 }
 
 /**
@@ -469,25 +453,18 @@ export async function deleteBackendCommitment(id: string): Promise<boolean> {
 export async function payBackendCommitment(
   id: string
 ): Promise<{ commitment: Commitment; transaction: Transaction } | null> {
-  try {
-    const res = await fetch(`${API_BASE}/commitments/${id}/pay`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validCommitment = CommitmentSchema.safeParse(data.commitment);
-      const validTransaction = TransactionSchema.safeParse(data.transaction);
-      if (validCommitment.success && validTransaction.success) {
-        return {
-          commitment: validCommitment.data as Commitment,
-          transaction: validTransaction.data as Transaction,
-        };
-      }
+  const res = await authApiFetch(`/commitments/${id}/pay`, {
+    method: 'POST',
+  });
+  if (res.ok && res.data) {
+    const validCommitment = CommitmentSchema.safeParse(res.data.commitment);
+    const validTransaction = TransactionSchema.safeParse(res.data.transaction);
+    if (validCommitment.success && validTransaction.success) {
+      return {
+        commitment: validCommitment.data as Commitment,
+        transaction: validTransaction.data as Transaction,
+      };
     }
-  } catch {
-    return null;
   }
   return null;
 }
@@ -496,21 +473,14 @@ export async function payBackendCommitment(
  * Reverts a settled commitment back to unpaid on the backend
  */
 export async function unpayBackendCommitment(id: string): Promise<Commitment | null> {
-  try {
-    const res = await fetch(`${API_BASE}/commitments/${id}/unpay`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      signal: AbortSignal.timeout(API_TIMEOUTS.MUTATION),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const validation = CommitmentSchema.safeParse(data.commitment);
-      if (validation.success) {
-        return validation.data as Commitment;
-      }
+  const res = await authApiFetch(`/commitments/${id}/unpay`, {
+    method: 'POST',
+  });
+  if (res.ok && res.data?.commitment) {
+    const validation = CommitmentSchema.safeParse(res.data.commitment);
+    if (validation.success) {
+      return validation.data as Commitment;
     }
-  } catch {
-    return null;
   }
   return null;
 }

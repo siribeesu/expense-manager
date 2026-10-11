@@ -58,7 +58,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     // 1. View-level scoped error boundary
     if (level === 'view') {
       return (
-        <div className="w-full p-6 sm:p-8 rounded-2xl bg-[#131B2F] border border-red-500/30 text-center space-y-4 my-6 shadow-xl">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="w-full p-6 sm:p-8 rounded-2xl bg-[#131B2F] border border-red-500/30 text-center space-y-4 my-6 shadow-xl"
+        >
           <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center mx-auto">
             <AlertTriangle className="w-5 h-5" />
           </div>
@@ -89,7 +93,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
     // 2. Widget-level scoped error boundary
     if (level === 'widget') {
       return (
-        <div className="p-4 rounded-xl bg-red-950/20 border border-red-500/30 text-xs text-red-300 flex items-center justify-between gap-3">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-4 rounded-xl bg-red-950/20 border border-red-500/30 text-xs text-red-300 flex items-center justify-between gap-3"
+        >
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
             <span>Widget display error: {this.state.error?.message || 'Calculation error'}</span>
@@ -107,7 +115,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
 
     // 3. Root-level full application error boundary
     return (
-      <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex items-center justify-center p-6">
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex items-center justify-center p-6"
+      >
         <div className="max-w-md w-full bg-[#131B2F] border border-slate-700/80 rounded-2xl p-6 shadow-2xl text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center mx-auto">
             <AlertTriangle className="w-6 h-6" />
