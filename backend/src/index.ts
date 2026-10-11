@@ -12,8 +12,9 @@ app.use(cors());
 app.use(express.json({ limit: '100kb' })); // Mitigate body flooding
 app.use(rateLimiterMiddleware);
 
-// API routes
+// API routes (supports both /api path prefix and root rewrites)
 app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -28,3 +29,4 @@ const server = app.listen(PORT, () => {
 });
 
 export { app, server };
+export default app;
