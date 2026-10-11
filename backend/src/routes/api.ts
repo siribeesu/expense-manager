@@ -74,8 +74,10 @@ apiRouter.post('/transactions', (req: Request, res: Response) => {
   res.status(201).json({ success: true, transaction });
 });
 
+const getId = (req: Request): string => (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
+
 apiRouter.put('/transactions/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const updated = db.updateTransaction(id, req.body);
   if (!updated) {
     res.status(404).json({ error: 'Transaction not found' });
@@ -85,7 +87,7 @@ apiRouter.put('/transactions/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.delete('/transactions/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const deleted = db.deleteTransaction(id);
   if (!deleted) {
     res.status(404).json({ error: 'Transaction not found' });
@@ -120,7 +122,7 @@ apiRouter.post('/goals', (req: Request, res: Response) => {
 });
 
 apiRouter.put('/goals/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const updated = db.updateGoal(id, req.body);
   if (!updated) {
     res.status(404).json({ error: 'Goal not found' });
@@ -130,7 +132,7 @@ apiRouter.put('/goals/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.delete('/goals/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const deleted = db.deleteGoal(id);
   if (!deleted) {
     res.status(404).json({ error: 'Goal not found' });
@@ -140,7 +142,7 @@ apiRouter.delete('/goals/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/goals/:id/deposit', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const { amount } = req.body;
   if (typeof amount !== 'number' || amount <= 0) {
     res.status(400).json({ error: 'Valid positive amount is required' });
@@ -156,7 +158,7 @@ apiRouter.post('/goals/:id/deposit', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/goals/:id/withdraw', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const { amount } = req.body;
   if (typeof amount !== 'number' || amount <= 0) {
     res.status(400).json({ error: 'Valid positive amount is required' });
@@ -198,7 +200,7 @@ apiRouter.post('/commitments', (req: Request, res: Response) => {
 });
 
 apiRouter.put('/commitments/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const updated = db.updateCommitment(id, req.body);
   if (!updated) {
     res.status(404).json({ error: 'Commitment not found' });
@@ -208,7 +210,7 @@ apiRouter.put('/commitments/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.delete('/commitments/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const deleted = db.deleteCommitment(id);
   if (!deleted) {
     res.status(404).json({ error: 'Commitment not found' });
@@ -218,7 +220,7 @@ apiRouter.delete('/commitments/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/commitments/:id/pay', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const result = db.payCommitment(id);
   if (!result) {
     res.status(400).json({ error: 'Commitment not found or already paid' });
@@ -228,7 +230,7 @@ apiRouter.post('/commitments/:id/pay', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/commitments/:id/unpay', (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getId(req);
   const commitment = db.unpayCommitment(id);
   if (!commitment) {
     res.status(400).json({ error: 'Commitment not found or not in paid state' });

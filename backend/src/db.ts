@@ -77,7 +77,7 @@ const INITIAL_DEMO_DATA: DatabaseSchema = {
 
 // Database file path resolution
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'paisapilot_db.json');
 
 export class Database {

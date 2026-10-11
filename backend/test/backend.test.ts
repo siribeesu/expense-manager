@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Database } from '../../server/db';
+import { Database } from '../src/db';
+import type { Transaction } from '../src/db';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_DB_FILE = path.join(__dirname, 'test_db.json');
@@ -55,7 +56,7 @@ describe('PaisaPilot Backend Database Engine', () => {
     // Delete
     const deleted = db.deleteTransaction(newTx.id);
     expect(deleted).toBe(true);
-    expect(db.getState().transactions.find((t) => t.id === newTx.id)).toBeUndefined();
+    expect(db.getState().transactions.find((t: Transaction) => t.id === newTx.id)).toBeUndefined();
   });
 
   it('atomically marks commitments as paid and creates linked expense transaction', () => {
@@ -77,13 +78,13 @@ describe('PaisaPilot Backend Database Engine', () => {
     expect(result?.transaction.type).toBe('commitment_payment');
 
     // Verify linked transaction is present in transactions list
-    const linkedTx = db.getState().transactions.find((t) => t.id === result?.transaction.id);
+    const linkedTx = db.getState().transactions.find((t: Transaction) => t.id === result?.transaction.id);
     expect(linkedTx).toBeDefined();
 
     // Revert / unpay
     const reverted = db.unpayCommitment(com.id);
     expect(reverted?.isPaid).toBe(false);
-    expect(db.getState().transactions.find((t) => t.id === result?.transaction.id)).toBeUndefined();
+    expect(db.getState().transactions.find((t: Transaction) => t.id === result?.transaction.id)).toBeUndefined();
   });
 
   it('manages goal deposits and withdrawals safely', () => {
