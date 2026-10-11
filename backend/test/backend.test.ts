@@ -112,4 +112,49 @@ describe('Thriftly Backend Database Engine', () => {
     const invalid = db.withdrawFromGoal(createdGoal.id, 999999);
     expect(invalid).toBeNull();
   });
+
+  it('enforces authentication and authorization headers via authMiddleware', async () => {
+    const { authMiddleware, DEFAULT_AUTH_TOKEN } = await import('../src/middleware/auth');
+    
+    // 1. Should block unauthorized requests to /state
+    let statusSet = 0;
+    let jsonSent: any = null;
+    let nextCalled = false;
+
+    const mockReq = {
+      path: '/state',
+      headers: {},
+    } as any;
+
+    const mockRes = {
+      status: (code: number) => {
+        statusSet = code;
+        return {
+          json: (data: any) => { jsonSent = data; },
+        };
+      },
+    } as any;
+
+    authMiddleware(mockReq, mockRes, () => { nextCalled = true; });
+
+    expect(statusSet).toBe(401);
+    expect(jsonSent?.error).toBe('Unauthorized');
+    expect(nextCalled).toBe(false);
+
+    // 2. Should permit request with valid Bearer token
+    let authorizedNext = false;
+    const authReq = {
+      path: '/state',
+      headers: { authorization: `Bearer ${DEFAULT_AUTH_TOKEN}` },
+    } as any;
+
+    authMiddleware(authReq, mockRes, () => { authorizedNext = true; });
+    expect(authorizedNext).toBe(true);
+
+    // 3. Should allow whitelisted public endpoints without token
+    let healthNext = false;
+    const healthReq = { path: '/health', headers: {} } as any;
+    authMiddleware(healthReq, mockRes, () => { healthNext = true; });
+    expect(healthNext).toBe(true);
+  });
 });
