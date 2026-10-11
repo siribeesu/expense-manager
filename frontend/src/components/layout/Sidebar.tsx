@@ -8,6 +8,7 @@ import {
   PiggyBank,
   CalendarClock,
   LineChart,
+  X,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -75,11 +76,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
 
       <aside
         className={cn(
-          'fixed top-[61px] left-0 bottom-0 z-40 w-64 bg-[#0B1020] border-r border-slate-800/80 flex flex-col justify-between p-4 transition-transform duration-200 ease-in-out',
+          'fixed top-0 lg:top-[61px] left-0 bottom-0 z-50 w-64 bg-[#0B1020] border-r border-slate-800/80 flex flex-col gap-6 p-4 transition-transform duration-200 ease-in-out overflow-y-auto',
           'lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
+        {/* Mobile Header with Close Button */}
+        <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-800 lg:hidden">
+          <span className="font-extrabold text-sm text-white">Menu Navigation</span>
+          <button
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
         {/* Navigation list */}
         <div className="space-y-6">
           <div className="space-y-1">
@@ -138,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="mt-auto pt-2 space-y-3 shrink-0">
           {/* Budget Allocation Widget at bottom */}
           <div className="p-3.5 rounded-2xl bg-[#131B2F] border border-slate-800/80 space-y-2.5">
           <div className="flex items-center justify-between text-xs">

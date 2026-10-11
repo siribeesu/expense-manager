@@ -10,6 +10,11 @@ html.light {
   color-scheme: light;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -18,8 +23,17 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Custom scrollbars */
@@ -85,6 +99,12 @@ body {
 /* Base dark container fallback */
 [data-theme="light"] [class*="bg-[#0B1020]"] {
   background-color: #FFFFFF !important;
+}
+
+/* Page canvas should remain soft slate-50 so cards pop with contrast */
+[data-theme="light"] div[class*="min-h-screen"],
+[data-theme="light"] main {
+  background-color: #F8FAFC !important;
 }
 
 /* 2. APP BARS & NAVIGATION */

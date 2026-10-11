@@ -203,10 +203,10 @@ export const SimulatorView: React.FC = () => {
                     key={opt.days}
                     type="button"
                     onClick={() => setSimulationParams({ delayDays: opt.days })}
-                    className={`py-2 px-2 text-xs font-medium rounded-xl border transition-all ${
+                    className={`py-2 px-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#C8FF55]/50 ${
                       simulationParams.delayDays === opt.days
-                        ? 'bg-[#C8FF55]/20 text-[#C8FF55] border-[#C8FF55]'
-                        : 'bg-[#0E1526] text-slate-400 border-slate-800 hover:text-white'
+                        ? 'bg-[#C8FF55]/20 text-[#C8FF55] border-[#C8FF55] shadow-sm'
+                        : 'bg-[#0E1526] text-slate-400 border-slate-800 hover:text-white hover:bg-slate-800/60'
                     }`}
                   >
                     {opt.label}
