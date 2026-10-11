@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { calculateFinancialHealth } from '../engine/healthScore';
 import { DEMO_SAVINGS_GOALS } from '../data/demoData';
 
-describe('PaisaPilot Financial Health Scoring Engine', () => {
+describe('Thriftly Financial Health Scoring Engine', () => {
   it('returns a robust baseline score for balanced finances', () => {
     const health = calculateFinancialHealth({
       totalBudget: 10000,

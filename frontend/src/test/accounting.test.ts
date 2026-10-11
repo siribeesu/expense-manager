@@ -11,7 +11,7 @@ import {
   SAMPLE_TEST_COMMITMENTS,
 } from '../data/demoData';
 
-describe('PaisaPilot Financial Accounting Engine', () => {
+describe('Thriftly Financial Accounting Engine', () => {
   it('correctly initializes the pristine Day 1 ready-to-use production baseline', () => {
     const metrics = calculateFinancialMetrics({
       totalBudget: INITIAL_TOTAL_BUDGET,

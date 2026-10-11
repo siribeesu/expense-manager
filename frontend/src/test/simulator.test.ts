@@ -7,7 +7,7 @@ import {
   SAMPLE_TEST_COMMITMENTS,
 } from '../data/demoData';
 
-describe('PaisaPilot What-If Simulator Engine', () => {
+describe('Thriftly What-If Simulator Engine', () => {
   const baseMetrics = calculateFinancialMetrics({
     totalBudget: 10000,
     currentDay: 12,

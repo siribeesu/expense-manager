@@ -49,7 +49,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-base lg:text-lg tracking-tight text-white">
-                Paisa<span className="text-[#C8FF55]">Pilot</span>
+                Thrift<span className="text-[#C8FF55]">ly</span>
               </span>
               <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                 Gen Z Beta

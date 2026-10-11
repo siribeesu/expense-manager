@@ -45,10 +45,10 @@ export async function fetchBackendState(): Promise<AppStoredState | null> {
       if (validation.success) {
         return validation.data as AppStoredState;
       }
-      console.warn('[PaisaPilot API] Received invalid schema from backend state:', validation.error);
+      console.warn('[Thriftly API] Received invalid schema from backend state:', validation.error);
     }
   } catch (err) {
-    console.warn('[PaisaPilot API] Falling back to local persistence:', err);
+    console.warn('[Thriftly API] Falling back to local persistence:', err);
   }
   return null;
 }
@@ -67,7 +67,7 @@ export async function resetBackendState(): Promise<AppStoredState | null> {
       }
     }
   } catch (err) {
-    console.warn('[PaisaPilot API] Reset error:', err);
+    console.warn('[Thriftly API] Reset error:', err);
   }
   return null;
 }
@@ -95,7 +95,7 @@ export async function createBackendTransaction(
       }
     }
   } catch (err) {
-    console.warn('[PaisaPilot API] Create transaction error:', err);
+    console.warn('[Thriftly API] Create transaction error:', err);
   }
   return null;
 }
@@ -124,7 +124,7 @@ export async function updateBackendTransaction(
       }
     }
   } catch (err) {
-    console.warn('[PaisaPilot API] Update transaction error:', err);
+    console.warn('[Thriftly API] Update transaction error:', err);
   }
   return null;
 }
@@ -164,7 +164,7 @@ export async function createBackendGoal(
       }
     }
   } catch (err) {
-    console.warn('[PaisaPilot API] Create goal error:', err);
+    console.warn('[Thriftly API] Create goal error:', err);
   }
   return null;
 }

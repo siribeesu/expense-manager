@@ -7,7 +7,7 @@ export const apiRouter = Router();
 apiRouter.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
-    service: 'PaisaPilot Backend API',
+    service: 'Thriftly Backend API',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
   });

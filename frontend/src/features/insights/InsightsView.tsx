@@ -67,7 +67,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({ onNavigate }) => {
                 <Badge variant="slate" size="sm">5 Weighted Factors</Badge>
               </div>
               <p className="text-xs text-slate-300 mt-3 leading-relaxed">
-                PaisaPilot evaluates your financial resiliency on an objective 0–100 scale using 5 key pillars: Cash Runway (30%), Bill Coverage (25%), Savings Progress (20%), Spending Velocity (15%), and Emergency Buffer (10%).
+                Thriftly evaluates your financial resiliency on an objective 0–100 scale using 5 key pillars: Cash Runway (30%), Bill Coverage (25%), Savings Progress (20%), Spending Velocity (15%), and Emergency Buffer (10%).
               </p>
             </div>
 

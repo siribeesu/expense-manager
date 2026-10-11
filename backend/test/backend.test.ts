@@ -8,7 +8,7 @@ import type { Transaction } from '../src/db';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_DB_FILE = path.join(__dirname, 'test_db.json');
 
-describe('PaisaPilot Backend Database Engine', () => {
+describe('Thriftly Backend Database Engine', () => {
   let db: Database;
 
   beforeEach(() => {
