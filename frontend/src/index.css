@@ -5,6 +5,11 @@
   color-scheme: dark;
 }
 
+:root[data-theme="light"],
+html.light {
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -14,9 +19,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom scrollbars for dark theme */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -39,4 +45,172 @@ body {
 :focus-visible {
   outline: 2px solid #C8FF55;
   outline-offset: 2px;
+}
+
+/* ============================================================
+   LIGHT MODE STYLING & COMPONENT OVERRIDES
+   ============================================================ */
+
+[data-theme="light"] body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+[data-theme="light"] :focus-visible {
+  outline: 2px solid #16A34A;
+}
+
+/* Layout & Background Overrides */
+[data-theme="light"] .bg-\[\#0B1020\] {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .bg-\[\#0B1020\]\/90,
+[data-theme="light"] .bg-\[\#0B1020\]\/95 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="light"] .bg-\[\#131B2F\] {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05) !important;
+}
+
+[data-theme="light"] .bg-\[\#0E1526\] {
+  background-color: #F1F5F9 !important;
+}
+
+[data-theme="light"] .bg-\[\#162038\] {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900\/90,
+[data-theme="light"] .bg-slate-900\/60,
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-950\/60 {
+  background-color: #F1F5F9 !important;
+}
+
+[data-theme="light"] .bg-slate-800,
+[data-theme="light"] .bg-slate-800\/60,
+[data-theme="light"] .bg-slate-800\/40,
+[data-theme="light"] .bg-slate-800\/30 {
+  background-color: #E2E8F0 !important;
+}
+
+/* Borders */
+[data-theme="light"] .border-slate-800,
+[data-theme="light"] .border-slate-800\/80,
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-slate-700\/60,
+[data-theme="light"] .border-slate-850 {
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .divide-slate-800,
+[data-theme="light"] .divide-slate-800\/80 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #E2E8F0 !important;
+}
+
+/* Typography Contrast in Light Mode */
+[data-theme="light"] .text-white {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-\[\#F8FAFC\] {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-slate-200 {
+  color: #1E293B !important;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Lime text contrast for light background */
+[data-theme="light"] .text-\[\#C8FF55\] {
+  color: #15803D !important;
+}
+
+[data-theme="light"] .text-emerald-400 {
+  color: #059669 !important;
+}
+
+[data-theme="light"] .text-amber-400 {
+  color: #D97706 !important;
+}
+
+[data-theme="light"] .text-cyan-400 {
+  color: #0284C7 !important;
+}
+
+/* Lime background tint & badge */
+[data-theme="light"] .bg-\[\#C8FF55\]\/10,
+[data-theme="light"] .bg-\[\#C8FF55\]\/15 {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+}
+
+[data-theme="light"] .border-\[\#C8FF55\]\/30,
+[data-theme="light"] .border-\[\#C8FF55\]\/40 {
+  border-color: rgba(22, 163, 74, 0.3) !important;
+}
+
+/* Inputs & Form Elements */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  border-color: #16A34A !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Gauge & Gradient Adaptations */
+[data-theme="light"] .from-\[\#131B2F\] {
+  --tw-gradient-from: #FFFFFF var(--tw-gradient-from-position) !important;
+}
+
+[data-theme="light"] .via-\[\#131B2F\] {
+  --tw-gradient-via: #FFFFFF var(--tw-gradient-via-position) !important;
+}
+
+[data-theme="light"] .to-\[\#1A2542\] {
+  --tw-gradient-to: #F1F5F9 var(--tw-gradient-to-position) !important;
+}
+
+[data-theme="light"] svg .text-slate-800 {
+  color: #E2E8F0 !important;
 }

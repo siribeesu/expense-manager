@@ -12,6 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import type { Transaction } from '../../types/finance';
 import { formatINR } from '../../lib/formatters';
+import { useTheme } from '../../context/useTheme';
 
 export interface DailySpendingChartProps {
   transactions: Transaction[];
@@ -26,6 +27,7 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
   totalDays,
   safeDailyAllowance,
 }) => {
+  const { theme } = useTheme();
   // Aggregate daily expenses
   const dailySpendMap: Record<number, number> = {};
   transactions.forEach((tx) => {
@@ -71,19 +73,19 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
       <div className="h-60 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1E293B' : '#E2E8F0'} vertical={false} />
             <XAxis
               dataKey="day"
-              stroke="#64748B"
+              stroke={theme === 'dark' ? '#64748B' : '#94A3B8'}
               fontSize={11}
               tickLine={false}
-              axisLine={{ stroke: '#1E293B' }}
+              axisLine={{ stroke: theme === 'dark' ? '#1E293B' : '#E2E8F0' }}
             />
             <YAxis
-              stroke="#64748B"
+              stroke={theme === 'dark' ? '#64748B' : '#94A3B8'}
               fontSize={11}
               tickLine={false}
-              axisLine={{ stroke: '#1E293B' }}
+              axisLine={{ stroke: theme === 'dark' ? '#1E293B' : '#E2E8F0' }}
               tickFormatter={(v) => `₹${v}`}
             />
             <Tooltip
@@ -121,7 +123,7 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
             />
             <Bar
               dataKey="spent"
-              fill="#C8FF55"
+              fill={theme === 'dark' ? '#C8FF55' : '#16A34A'}
               radius={[4, 4, 0, 0]}
               maxBarSize={32}
             />
