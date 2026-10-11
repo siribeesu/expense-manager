@@ -20,6 +20,7 @@ import {
   TrendingDown,
   Clock,
   Sparkles,
+  Receipt,
 } from 'lucide-react';
 import type { ActiveTab } from '../../components/layout/Sidebar';
 
@@ -202,39 +203,61 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </CardHeader>
 
-            <div className="divide-y divide-slate-800/80">
-              {recentTransactions.map((tx) => {
-                const meta = getCategoryMeta(tx.category);
-                return (
-                  <div
-                    key={tx.id}
-                    className="py-3 flex items-center justify-between hover:bg-slate-800/30 px-2 rounded-xl transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
-                      >
-                        <span className="text-xs font-bold">{meta.label.slice(0, 2)}</span>
+            {recentTransactions.length === 0 ? (
+              <div className="py-8 px-4 text-center space-y-2.5">
+                <div className="w-10 h-10 rounded-full bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mx-auto text-slate-500">
+                  <Receipt className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">No transactions recorded yet</p>
+                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
+                    Your full ₹10,000 runway is untouched. Log your first expense to begin tracking.
+                  </p>
+                </div>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={onOpenAddTransaction}
+                  className="text-xs font-bold"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Record Expense
+                </Button>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-800/80">
+                {recentTransactions.map((tx) => {
+                  const meta = getCategoryMeta(tx.category);
+                  return (
+                    <div
+                      key={tx.id}
+                      className="py-3 flex items-center justify-between hover:bg-slate-800/30 px-2 rounded-xl transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
+                        >
+                          <span className="text-xs font-bold">{meta.label.slice(0, 2)}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">
+                            {tx.description}
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            {meta.label} · Day {tx.day}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">
-                          {tx.description}
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {meta.label} · Day {tx.day}
-                        </p>
+                      <div className="text-right font-mono shrink-0 pl-3">
+                        <span className="text-sm font-bold text-white">
+                          -{formatINR(tx.amount)}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right font-mono shrink-0 pl-3">
-                      <span className="text-sm font-bold text-white">
-                        -{formatINR(tx.amount)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
         </div>
 
@@ -260,37 +283,59 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             </CardHeader>
 
-            <div className="space-y-2.5">
-              {upcomingCommitments.map((com) => {
-                const meta = getCategoryMeta(com.category);
-                return (
-                  <div
-                    key={com.id}
-                    className="p-3 rounded-xl bg-[#0E1526] border border-slate-800 flex items-center justify-between"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-white truncate">
-                          {com.name}
-                        </span>
-                        {com.isSubscription && (
-                          <Badge variant="slate" size="sm">OTT / Sub</Badge>
-                        )}
+            {upcomingCommitments.length === 0 ? (
+              <div className="py-8 px-4 text-center space-y-2.5">
+                <div className="w-10 h-10 rounded-full bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mx-auto text-slate-500">
+                  <Clock className="w-5 h-5 text-amber-400/80" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">No fixed commitments scheduled</p>
+                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
+                    Add recurring bills or subscriptions so PaisaPilot locks funds before you overspend.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onNavigate('commitments')}
+                  className="text-xs font-bold"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Fixed Bill
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {upcomingCommitments.map((com) => {
+                  const meta = getCategoryMeta(com.category);
+                  return (
+                    <div
+                      key={com.id}
+                      className="p-3 rounded-xl bg-[#0E1526] border border-slate-800 flex items-center justify-between"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-white truncate">
+                            {com.name}
+                          </span>
+                          {com.isSubscription && (
+                            <Badge variant="slate" size="sm">OTT / Sub</Badge>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          {meta.label} · Due on Day {com.dueDay} ({com.dueDay - metrics.currentDay} days away)
+                        </p>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        {meta.label} · Due on Day {com.dueDay} ({com.dueDay - metrics.currentDay} days away)
-                      </p>
+                      <div className="text-right font-mono shrink-0 pl-3">
+                        <span className="text-sm font-bold text-amber-400">
+                          {formatINR(com.amount)}
+                        </span>
+                        <span className="block text-[10px] text-slate-400">Reserved</span>
+                      </div>
                     </div>
-                    <div className="text-right font-mono shrink-0 pl-3">
-                      <span className="text-sm font-bold text-amber-400">
-                        {formatINR(com.amount)}
-                      </span>
-                      <span className="block text-[10px] text-slate-400">Reserved</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
               <span>Total reserved in bills</span>

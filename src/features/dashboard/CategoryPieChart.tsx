@@ -41,8 +41,14 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ categoryTota
       </CardHeader>
 
       {chartData.length === 0 ? (
-        <div className="h-64 flex flex-col items-center justify-center text-slate-500 text-xs text-center p-4">
-          <p>No expense transactions recorded yet.</p>
+        <div className="h-64 flex flex-col items-center justify-center text-center p-6 space-y-2">
+          <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-700/80 flex items-center justify-center text-[#C8FF55]/60 font-mono text-sm">
+            ₹0
+          </div>
+          <p className="text-xs font-semibold text-slate-300">No expenses recorded yet</p>
+          <p className="text-[11px] text-slate-500 max-w-xs leading-relaxed">
+            Your full ₹10,000 runway is 100% intact. As you record transactions, your category spending breakdown will display here.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">

@@ -186,10 +186,29 @@ export const TransactionsView: React.FC = () => {
       {filteredTransactions.length === 0 ? (
         <Card className="py-12 text-center space-y-3">
           <Receipt className="w-10 h-10 text-slate-600 mx-auto" />
-          <h3 className="text-sm font-bold text-white">No transactions found</h3>
+          <h3 className="text-sm font-bold text-white">
+            {transactions.length === 0 ? 'No expenses recorded yet' : 'No matching transactions'}
+          </h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Try adjusting your search query or category filters, or record a new expense.
+            {transactions.length === 0
+              ? 'Your full ₹10,000 budget is ready. Record your first spend to begin tracking your flightpath.'
+              : 'Try adjusting your search query or category filters, or record a new expense.'}
           </p>
+          {transactions.length === 0 && (
+            <div className="pt-1">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  setEditingTransaction(null);
+                  setIsModalOpen(true);
+                }}
+                className="font-bold text-xs"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Record First Expense
+              </Button>
+            </div>
+          )}
         </Card>
       ) : (
         <div className="space-y-2.5">

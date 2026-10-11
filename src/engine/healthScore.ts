@@ -18,6 +18,7 @@ export function calculateFinancialHealth({
   safeDailyAllowance,
   reservedCommitments,
   reservedSavings,
+  totalSpent = 0,
   currentDay,
   totalDays,
   savingsGoals,
@@ -99,9 +100,9 @@ export function calculateFinancialHealth({
 
   // 3. Savings Target Progress (Max 20)
   // Compare savings achieved vs expected proportion based on timeline
-  let savingsProgressScore = 10; // Default baseline
   const totalGoalTarget = savingsGoals.reduce((sum, g) => sum + g.targetAmount, 0);
   const totalGoalSaved = reservedSavings;
+  let savingsProgressScore = totalGoalTarget > 0 ? 10 : 15;
 
   if (totalGoalTarget > 0) {
     const savingsRatio = Math.min(1.2, totalGoalSaved / totalGoalTarget);
@@ -160,7 +161,7 @@ export function calculateFinancialHealth({
 
   if (totalScore >= 78) {
     riskLevel = 'low';
-    headline = 'Smooth Runway — Balanced Spending & Healthy Reserves';
+    headline = totalSpent === 0 ? 'Optimal Launchpad — Full ₹10,000 Runway Ready' : 'Smooth Runway — Balanced Spending & Healthy Reserves';
   } else if (totalScore >= 60) {
     riskLevel = 'moderate';
     headline = 'Stable Orbit — Minor Adjustments Advised';

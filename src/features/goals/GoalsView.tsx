@@ -114,6 +114,19 @@ export const GoalsView: React.FC = () => {
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
             Build resilience against unexpected shocks by starting an emergency fund goal.
           </p>
+          <div className="pt-1">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setEditingGoal(null);
+                setIsFormOpen(true);
+              }}
+              className="font-bold text-xs"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> Create First Goal
+            </Button>
+          </div>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
