@@ -214,7 +214,7 @@ export const CommitmentsView: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800 flex-wrap sm:flex-nowrap">
                     <div className="text-left sm:text-right font-mono">
                       <span className="text-base font-extrabold text-amber-400 block">
                         {formatINR(com.amount)}

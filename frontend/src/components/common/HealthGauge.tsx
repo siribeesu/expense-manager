@@ -38,8 +38,8 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
   const currentColor = riskColors[activeRisk];
 
   return (
-    <Card className="flex flex-col justify-between p-5 relative overflow-hidden">
-      <div className="flex items-center justify-between">
+    <Card className="flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
             Financial Health Flightpath
@@ -48,10 +48,12 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
             {isComparing ? 'Simulated Impact Projection' : 'Deterministic 0–100 Score'}
           </span>
         </div>
-        {riskBadges[activeRisk]}
+        <div className="self-start sm:self-center">
+          {riskBadges[activeRisk]}
+        </div>
       </div>
 
-      <div className="my-4 flex items-center gap-5">
+      <div className="my-3 sm:my-4 flex items-center gap-3.5 sm:gap-5">
         {/* Score Ring Display */}
         <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
           <svg

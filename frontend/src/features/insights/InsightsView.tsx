@@ -156,7 +156,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({ onNavigate }) => {
 
       {/* Dynamic Prioritized Insights List */}
       <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <h3 className="text-sm font-bold text-white tracking-tight">
             Prioritized Real-Time Money Insights
           </h3>

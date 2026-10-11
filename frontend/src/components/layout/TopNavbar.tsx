@@ -34,24 +34,24 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#0B1020]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-2.5 transition-colors duration-200">
-      <div className="flex items-center justify-between gap-3 w-full max-w-[1720px] mx-auto">
+    <header className="sticky top-0 z-40 w-full bg-[#0B1020]/90 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 transition-colors duration-200">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 w-full max-w-[1720px] mx-auto min-w-0">
         {/* Brand Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#C8FF55] flex items-center justify-center text-[#0B1020] shadow-[0_0_15px_rgba(200,255,85,0.3)] font-black text-lg">
-              <Compass className="w-5 h-5 stroke-[2.5]" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#C8FF55] flex items-center justify-center text-[#0B1020] shadow-[0_0_15px_rgba(200,255,85,0.3)] font-black text-base sm:text-lg shrink-0">
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base lg:text-lg tracking-tight text-white">
+              <span className="font-extrabold text-sm sm:text-base lg:text-lg tracking-tight text-white">
                 Thrift<span className="text-[#C8FF55]">ly</span>
               </span>
               <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
@@ -82,7 +82,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           role="status"
           aria-live="polite"
           className={cn(
-            'hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+            'hidden md:flex items-center gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0',
             isBackendConnected
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
               : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
@@ -102,22 +102,23 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             )}
             aria-hidden="true"
           />
-          <span>{isBackendConnected ? 'Cloud Synced' : 'Offline · Encrypted Vault'}</span>
+          <span className="hidden lg:inline">{isBackendConnected ? 'Cloud Synced' : 'Offline · Encrypted Vault'}</span>
+          <span className="lg:hidden">{isBackendConnected ? 'Synced' : 'Vault'}</span>
           <span className="sr-only">
             {isBackendConnected ? 'Cloud synchronization is active' : 'Offline mode, ledger saved to encrypted vault'}
           </span>
         </div>
 
         {/* Quick Stats & Controls */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Day Indicator with Advance Button */}
-          <div className="flex items-center bg-[#131B2F] border border-slate-700/60 rounded-xl p-1 px-2.5 gap-2">
+          <div className="flex items-center bg-[#131B2F] border border-slate-700/60 rounded-xl p-1 px-2 sm:px-2.5 gap-1.5 sm:gap-2">
             <div className="text-left">
-              <span className="text-[10px] uppercase font-semibold text-slate-400 block leading-tight">
+              <span className="text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 block leading-tight">
                 Budget Cycle
               </span>
-              <span className="text-xs font-mono font-bold text-white">
-                Day {currentDay} <span className="text-slate-400">/ {totalDays}</span>
+              <span className="text-[11px] sm:text-xs font-mono font-bold text-white leading-tight block">
+                Day {currentDay} <span className="text-slate-400 font-normal">/ {totalDays}</span>
               </span>
             </div>
             <button
@@ -127,7 +128,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               aria-label="Advance budget day"
               className="p-1 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-[#C8FF55] transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             >
-              <FastForward className="w-4 h-4" />
+              <FastForward className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
 

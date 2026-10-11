@@ -265,7 +265,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-24 px-3 sm:px-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150"
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
@@ -365,8 +365,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer shortcuts hint */}
-        <div className="px-4 py-2.5 bg-[#0E1526] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-3">
+        <div className="px-3 sm:px-4 py-2 bg-[#0E1526] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span>
               <kbd className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[10px]">↑↓</kbd>{' '}
               Navigate
@@ -376,7 +376,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               Select
             </span>
           </div>
-          <span className="font-mono text-[10px] text-slate-500">Thriftly ⌘K Quick Navigator</span>
+          <span className="font-mono text-[10px] text-slate-500 hidden sm:inline">Thriftly ⌘K Quick Navigator</span>
         </div>
       </div>
     </div>

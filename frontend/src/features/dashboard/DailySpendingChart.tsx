@@ -52,9 +52,9 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
   return (
     <Card className="flex flex-col justify-between">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <CardTitle>Daily Spending Velocity</CardTitle>
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
             <span className="flex items-center gap-1.5 text-slate-400">
               <span className={`w-2.5 h-2.5 rounded-sm ${theme === 'dark' ? 'bg-[#C8FF55]' : 'bg-[#16A34A]'}`} />
               Actual Spend

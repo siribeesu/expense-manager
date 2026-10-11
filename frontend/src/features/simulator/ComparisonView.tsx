@@ -72,8 +72,8 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   ];
 
   return (
-    <Card className="p-5 space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+    <Card className="p-4 sm:p-5 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-800">
         <div>
           <h4 className="text-sm font-bold text-white tracking-tight">
             Current Plan vs. Simulated Decision
@@ -82,10 +82,12 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             Side-by-side delta preview for {formatINR(expenseAmount)} proposed outlay
           </p>
         </div>
-        <Badge variant={projection.deltaHealthScore < -10 ? 'amber' : 'lime'}>
-          {projection.deltaDailyAllowance < 0 ? '-' : '+'}
-          {formatINR(Math.abs(projection.deltaDailyAllowance))}/day impact
-        </Badge>
+        <div className="self-start sm:self-auto">
+          <Badge variant={projection.deltaHealthScore < -10 ? 'amber' : 'lime'}>
+            {projection.deltaDailyAllowance < 0 ? '-' : '+'}
+            {formatINR(Math.abs(projection.deltaDailyAllowance))}/day impact
+          </Badge>
+        </div>
       </div>
 
       <div className="divide-y divide-slate-800/80">
@@ -98,7 +100,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
               {row.label}
             </span>
 
-            <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 text-xs font-mono">
               <div className="text-right">
                 <span className="text-[10px] text-slate-400 block sm:hidden">Current:</span>
                 <span className="text-slate-400 font-semibold">{row.current}</span>
@@ -106,7 +108,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
 
               <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
 
-              <div className="text-right min-w-[70px]">
+              <div className="text-right min-w-[65px] sm:min-w-[70px]">
                 <span className="text-[10px] text-slate-400 block sm:hidden">Simulated:</span>
                 <span className="text-white font-bold">{row.simulated}</span>
               </div>
