@@ -3,6 +3,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import { Switch } from '../../components/ui/Switch';
 import type { Commitment, TransactionCategory, CommitmentFrequency } from '../../types/finance';
 
 export interface CommitmentFormModalProps {
@@ -160,15 +161,12 @@ const CommitmentFormContent: React.FC<FormContentProps> = ({
         />
       </div>
 
-      <label className="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer pt-1">
-        <input
-          type="checkbox"
-          checked={isSubscription}
-          onChange={(e) => setIsSubscription(e.target.checked)}
-          className="rounded border-slate-700 bg-slate-900 text-[#C8FF55] focus:ring-[#C8FF55] w-4 h-4"
-        />
-        <span>This is an auto-renewing digital subscription</span>
-      </label>
+      <Switch
+        checked={isSubscription}
+        onChange={setIsSubscription}
+        label="Digital Subscription"
+        description="Auto-renewing OTT, streaming, or SaaS app"
+      />
 
       <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>

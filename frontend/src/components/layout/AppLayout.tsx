@@ -30,7 +30,7 @@ export const AppLayout: React.FC = () => {
   const handleNavigate = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
   // Global Keyboard Shortcuts (Pro-user power navigation)
@@ -102,7 +102,7 @@ export const AppLayout: React.FC = () => {
   }, [handleNavigate, advanceDay, toggleTheme]);
 
   return (
-    <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#C8FF55]/30 selection:text-[#C8FF55] relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#C8FF55]/30 selection:text-[#C8FF55] relative">
       {/* Subtle Ambient Background Mesh / Radial Glows */}
       <div
         className="fixed top-0 left-1/4 w-[600px] h-[400px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none -z-10"

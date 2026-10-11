@@ -3,6 +3,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import { Switch } from '../../components/ui/Switch';
 import type { Transaction, TransactionCategory } from '../../types/finance';
 
 export interface TransactionFormModalProps {
@@ -154,15 +155,12 @@ const TransactionFormContent: React.FC<FormContentProps> = ({
         <option value="other">Miscellaneous</option>
       </Select>
 
-      <label className="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer pt-1">
-        <input
-          type="checkbox"
-          checked={isRecurring}
-          onChange={(e) => setIsRecurring(e.target.checked)}
-          className="rounded border-slate-700 bg-slate-900 text-[#C8FF55] focus:ring-[#C8FF55] w-4 h-4"
-        />
-        <span>Mark as repeating / recurring expense</span>
-      </label>
+      <Switch
+        checked={isRecurring}
+        onChange={setIsRecurring}
+        label="Recurring Expense"
+        description="Mark this transaction as repeating every cycle"
+      />
 
       <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
