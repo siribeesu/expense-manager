@@ -301,7 +301,3 @@ Thriftly is fully configured for one-click deployment on **[Vercel](https://verc
 | `PORT` | `3001` | Express backend port (local development) |
 
 ---
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE). Built for the Gen Z Personal Finance Challenge.
