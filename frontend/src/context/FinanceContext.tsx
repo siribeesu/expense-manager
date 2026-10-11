@@ -39,7 +39,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setIsBackendConnected(true);
         financeSyncService.pullInitialState().then((backendState) => {
           if (backendState && isMounted) {
-            setPersisted(backendState);
+            setPersisted((current) => {
+              const hasLocalData = current.transactions.length > 0 || current.savingsGoals.length > 0 || current.commitments.length > 0;
+              const hasBackendData = backendState.transactions.length > 0 || backendState.savingsGoals.length > 0 || backendState.commitments.length > 0;
+              if (hasBackendData || !hasLocalData) {
+                return backendState;
+              }
+              return current;
+            });
           }
         });
       }

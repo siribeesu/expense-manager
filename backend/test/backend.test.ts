@@ -25,14 +25,14 @@ describe('Thriftly Backend Database Engine', () => {
     }
   });
 
-  it('initializes with a clean pristine Day 1 state ready for user', () => {
+  it('initializes with sample financial data ready for user', () => {
     const state = db.getState();
     expect(state.totalBudget).toBe(10000);
-    expect(state.currentDay).toBe(1);
+    expect(state.currentDay).toBe(12);
     expect(state.totalDays).toBe(30);
-    expect(state.transactions.length).toBe(0);
-    expect(state.savingsGoals.length).toBe(0);
-    expect(state.commitments.length).toBe(0);
+    expect(state.transactions.length).toBe(8);
+    expect(state.savingsGoals.length).toBe(2);
+    expect(state.commitments.length).toBe(4);
   });
 
   it('adds, updates, and deletes transactions in persistent database', () => {
