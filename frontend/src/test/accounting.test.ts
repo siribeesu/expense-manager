@@ -2,10 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { calculateFinancialMetrics } from '../engine/accounting';
 import {
   INITIAL_TOTAL_BUDGET,
-  INITIAL_CURRENT_DAY,
-  DEMO_TRANSACTIONS,
-  DEMO_SAVINGS_GOALS,
-  DEMO_COMMITMENTS,
   SAMPLE_TEST_TRANSACTIONS,
   SAMPLE_TEST_GOALS,
   SAMPLE_TEST_COMMITMENTS,
@@ -15,11 +11,11 @@ describe('Thriftly Financial Accounting Engine', () => {
   it('correctly initializes the pristine Day 1 ready-to-use production baseline', () => {
     const metrics = calculateFinancialMetrics({
       totalBudget: INITIAL_TOTAL_BUDGET,
-      currentDay: INITIAL_CURRENT_DAY,
+      currentDay: 1,
       totalDays: 30,
-      transactions: DEMO_TRANSACTIONS,
-      savingsGoals: DEMO_SAVINGS_GOALS,
-      commitments: DEMO_COMMITMENTS,
+      transactions: [],
+      savingsGoals: [],
+      commitments: [],
     });
 
     // Pristine day 1 values

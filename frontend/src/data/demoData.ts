@@ -1,15 +1,10 @@
 import type { Transaction, SavingsGoal, Commitment } from '../types/finance';
 
 export const INITIAL_TOTAL_BUDGET = 10000;
-export const INITIAL_CURRENT_DAY = 1;
+export const INITIAL_CURRENT_DAY = 12;
 export const INITIAL_TOTAL_DAYS = 30;
 
-// Production ready-to-use initial clean state
-export const DEMO_TRANSACTIONS: Transaction[] = [];
-export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [];
-export const DEMO_COMMITMENTS: Commitment[] = [];
-
-// Sample reference dataset for unit tests or optional demonstration loading
+// Sample reference dataset populated with realistic Indian student / young adult expenses
 export const SAMPLE_TEST_TRANSACTIONS: Transaction[] = [
   {
     id: 'tx-sample-1',
@@ -165,6 +160,11 @@ export const SAMPLE_TEST_COMMITMENTS: Commitment[] = [
     serviceProvider: 'Google Services',
   },
 ];
+
+// Default demo dataset populated with realistic Indian Gen Z finance records
+export const DEMO_TRANSACTIONS: Transaction[] = [...SAMPLE_TEST_TRANSACTIONS];
+export const DEMO_SAVINGS_GOALS: SavingsGoal[] = [...SAMPLE_TEST_GOALS];
+export const DEMO_COMMITMENTS: Commitment[] = [...SAMPLE_TEST_COMMITMENTS];
 
 export const PRESET_UNEXPECTED_SCENARIOS = [
   {

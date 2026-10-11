@@ -11,6 +11,7 @@ import {
   Moon,
   Search,
   Keyboard,
+  Sparkles,
 } from 'lucide-react';
 import { useTheme } from '../../context/useTheme';
 
@@ -27,7 +28,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onOpenCommandPalette,
   onOpenShortcuts,
 }) => {
-  const { currentDay, totalDays, metrics, advanceDay } = useFinance();
+  const { currentDay, totalDays, metrics, advanceDay, resetToDemoData } = useFinance();
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -107,6 +108,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Sample Data Quick Loader */}
+          <button
+            type="button"
+            onClick={resetToDemoData}
+            title="Load realistic sample data (8 transactions, 2 goals, 4 bills)"
+            aria-label="Load Sample Data"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#131B2F] border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-[#C8FF55] hover:border-[#C8FF55]/40 transition-all cursor-pointer shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#C8FF55]" />
+            <span className="hidden sm:inline">Sample Data</span>
+          </button>
 
           {/* Theme Toggle Button (Dark / Light) */}
           <button
