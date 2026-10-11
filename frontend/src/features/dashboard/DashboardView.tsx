@@ -301,7 +301,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div>
                   <p className="text-xs font-semibold text-white">No fixed commitments scheduled</p>
                   <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
-                    Add recurring bills or subscriptions so PaisaPilot locks funds before you overspend.
+                    Add recurring bills or subscriptions so Thriftly locks funds before you overspend.
                   </p>
                 </div>
                 <Button

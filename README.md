@@ -1,4 +1,4 @@
-# 🚀 PaisaPilot — Every rupee has a plan.
+# 🚀 Thriftly — Every rupee has a plan.
 
 > **Your ₹10,000. Your 30 days. Your decisions.**
 > An interactive personal finance management cockpit and financial decision simulator for Gen Z users in India.
@@ -18,7 +18,7 @@ prompt-run/
 │   │   └── routes/
 │   │       └── api.ts             # RESTful API endpoints (/api/*)
 │   ├── data/
-│   │   └── paisapilot_db.json     # Persistent ledger storage
+│   │   └── thriftly_db.json       # Persistent ledger storage
 │   ├── test/
 │   │   └── backend.test.ts        # Database & API test suite
 │   ├── package.json
@@ -121,7 +121,7 @@ Base URL: `http://localhost:3001/api`
 
 ## ☁️ Vercel Deployment Guide
 
-PaisaPilot is fully configured for seamless one-click deployment on **Vercel**:
+Thriftly is fully configured for seamless one-click deployment on **Vercel**:
 
 ### Option A: Monorepo / Root Deployment (Recommended)
 1. Push the code to GitHub and import the repository on [Vercel](https://vercel.com).

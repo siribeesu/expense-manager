@@ -78,7 +78,7 @@ const INITIAL_DEMO_DATA: DatabaseSchema = {
 // Database file path resolution (uses /tmp in Vercel serverless environment)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
-const DB_FILE = path.join(DATA_DIR, 'paisapilot_db.json');
+const DB_FILE = path.join(DATA_DIR, 'thriftly_db.json');
 
 export class Database {
   private inMemoryCache: DatabaseSchema;

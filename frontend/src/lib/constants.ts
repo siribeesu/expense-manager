@@ -20,6 +20,6 @@ export const FINANCIAL_RULES = {
 } as const;
 
 export const STORAGE_KEYS = {
-  FINANCE_STATE: 'paisapilot_state_v1',
-  THEME: 'paisapilot_theme',
+  FINANCE_STATE: 'thriftly_state_v1',
+  THEME: 'thriftly_theme',
 } as const;

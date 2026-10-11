@@ -376,7 +376,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               Select
             </span>
           </div>
-          <span className="font-mono text-[10px] text-slate-500">PaisaPilot ⌘K Quick Navigator</span>
+          <span className="font-mono text-[10px] text-slate-500">Thriftly ⌘K Quick Navigator</span>
         </div>
       </div>
     </div>

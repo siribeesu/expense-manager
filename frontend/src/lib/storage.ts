@@ -10,13 +10,14 @@ import {
 } from '../data/demoData';
 
 const STORAGE_KEYS = {
-  BUDGET: 'paisapilot_total_budget',
-  CURRENT_DAY: 'paisapilot_current_day',
-  TOTAL_DAYS: 'paisapilot_total_days',
-  TRANSACTIONS: 'paisapilot_transactions',
-  GOALS: 'paisapilot_savings_goals',
-  COMMITMENTS: 'paisapilot_commitments',
-  ENCRYPTED_VAULT: 'paisapilot_vault_v1',
+  BUDGET: 'thriftly_total_budget',
+  CURRENT_DAY: 'thriftly_current_day',
+  TOTAL_DAYS: 'thriftly_total_days',
+  TRANSACTIONS: 'thriftly_transactions',
+  GOALS: 'thriftly_savings_goals',
+  COMMITMENTS: 'thriftly_commitments',
+  ENCRYPTED_VAULT: 'thriftly_vault_v1',
+  LEGACY_VAULT: 'paisapilot_vault_v1',
 };
 
 const VAULT_PREFIX = 'PP_ENC_V1:';
@@ -99,8 +100,8 @@ export interface AppStoredState {
 
 export function loadStoredState(): AppStoredState {
   try {
-    // 1. Try modern encrypted vault format first
-    const vault = getStorageItem(STORAGE_KEYS.ENCRYPTED_VAULT);
+    // 1. Try modern encrypted vault format first (migrates legacy vault if present)
+    const vault = getStorageItem(STORAGE_KEYS.ENCRYPTED_VAULT) || getStorageItem(STORAGE_KEYS.LEGACY_VAULT);
     if (vault) {
       const decrypted = unprotectData(vault);
       const parsed = JSON.parse(decrypted);

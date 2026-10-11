@@ -42,7 +42,7 @@ export function exportTransactionsToCsv(
 
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `paisapilot_ledger_cycle30_${Date.now()}.csv`);
+    link.setAttribute('download', `thriftly_ledger_cycle30_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -56,7 +56,7 @@ export function exportTransactionsToCsv(
     if (onResult) onResult(res);
     return res;
   } catch (error) {
-    console.error('[PaisaPilot CSV Export Error]:', error);
+    console.error('[Thriftly CSV Export Error]:', error);
     const res: CsvExportResult = {
       success: false,
       message: 'Failed to generate CSV export file due to a browser permission or memory error.',

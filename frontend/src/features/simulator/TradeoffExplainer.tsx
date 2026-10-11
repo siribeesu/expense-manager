@@ -62,7 +62,7 @@ export const TradeoffExplainer: React.FC<TradeoffExplainerProps> = ({
       <div className="p-3 rounded-xl bg-[#0B1020]/70 border border-slate-800 flex items-start gap-2.5 text-xs text-slate-300">
         <Lightbulb className="w-4 h-4 text-[#C8FF55] shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-[#C8FF55] block">Strategic Pilot Advice:</span>
+          <span className="font-bold text-[#C8FF55] block">Strategic Thriftly Advice:</span>
           <span>{projection.alternativeRecommendation}</span>
         </div>
       </div>

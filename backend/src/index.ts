@@ -18,14 +18,14 @@ app.use('/', apiRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[PaisaPilot API Error]:', err);
+  console.error('[Thriftly API Error]:', err);
   res.status(500).json({ error: 'Internal Server Error', message: err?.message || 'Unknown error' });
 });
 
 // Start Server
 const server = app.listen(PORT, () => {
-  console.log(`🚀 [PaisaPilot Backend] Server running at http://localhost:${PORT}`);
-  console.log(`📡 [PaisaPilot Backend] REST API available at http://localhost:${PORT}/api`);
+  console.log(`🚀 [Thriftly Backend] Server running at http://localhost:${PORT}`);
+  console.log(`📡 [Thriftly Backend] REST API available at http://localhost:${PORT}/api`);
 });
 
 export { app, server };

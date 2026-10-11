@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[PaisaPilot Error Boundary caught error]:', error, errorInfo);
+    console.error('[Thriftly Error Boundary caught error]:', error, errorInfo);
   }
 
   private handleReset = () => {
@@ -51,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-white tracking-tight">Something went unexpected</h2>
               <p className="text-xs text-slate-400">
-                PaisaPilot encountered an application error. Your core ledger records are safe in local storage.
+                Thriftly encountered an application error. Your core ledger records are safe in local storage.
               </p>
             </div>
 

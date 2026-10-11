@@ -223,7 +223,7 @@ export const GoalsView: React.FC = () => {
 
                   {/* Recommended daily contribution */}
                   <div className="mt-3 p-2.5 rounded-xl bg-[#0E1526] border border-slate-800/90 text-xs flex items-center justify-between">
-                    <span className="text-slate-400">PaisaPilot Flight Guidance:</span>
+                    <span className="text-slate-400">Thriftly Flight Guidance:</span>
                     {isCompleted ? (
                       <span className="text-[#C8FF55] font-bold">Goal 100% Met!</span>
                     ) : (

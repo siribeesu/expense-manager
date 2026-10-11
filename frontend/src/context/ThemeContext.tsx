@@ -4,7 +4,7 @@ import { ThemeContext, type Theme } from './themeContextDef';
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('paisapilot_theme');
+      const stored = localStorage.getItem('thriftly_theme') || localStorage.getItem('paisapilot_theme');
       if (stored === 'light' || stored === 'dark') {
         return stored;
       }
@@ -22,7 +22,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.add('dark');
       root.classList.remove('light');
     }
-    localStorage.setItem('paisapilot_theme', theme);
+    localStorage.setItem('thriftly_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
