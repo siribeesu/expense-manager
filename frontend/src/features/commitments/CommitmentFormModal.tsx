@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Switch } from '../../components/ui/Switch';
+import { sanitizeText } from '../../lib/sanitizer';
 import type { Commitment, TransactionCategory, CommitmentFrequency } from '../../types/finance';
 
 export interface CommitmentFormModalProps {
@@ -68,13 +69,17 @@ const CommitmentFormContent: React.FC<FormContentProps> = ({
   const [dueDay, setDueDay] = useState(initialData ? initialData.dueDay : 15);
   const [isSubscription, setIsSubscription] = useState(!!initialData?.isSubscription);
   const [serviceProvider, setServiceProvider] = useState(initialData?.serviceProvider || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; amount?: string; dueDay?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const newErrors: { name?: string; amount?: string; dueDay?: string } = {};
 
-    if (!name.trim()) {
+    const cleanName = sanitizeText(name);
+    if (!cleanName) {
       newErrors.name = 'Obligation name is required';
     }
 
@@ -92,16 +97,21 @@ const CommitmentFormContent: React.FC<FormContentProps> = ({
       return;
     }
 
-    onSubmit({
-      name: name.trim(),
-      amount: numAmount,
-      category,
-      dueDay,
-      frequency: 'monthly',
-      isSubscription,
-      serviceProvider: serviceProvider.trim() || undefined,
-    });
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        name: cleanName,
+        amount: numAmount,
+        category,
+        dueDay,
+        frequency: 'monthly',
+        isSubscription,
+        serviceProvider: serviceProvider ? sanitizeText(serviceProvider) : undefined,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,7 +182,14 @@ const CommitmentFormContent: React.FC<FormContentProps> = ({
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" size="sm" className="font-bold">
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+          className="font-bold"
+        >
           {initialData ? 'Save Commitment' : 'Add Commitment'}
         </Button>
       </div>

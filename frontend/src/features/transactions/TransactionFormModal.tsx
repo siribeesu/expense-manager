@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Switch } from '../../components/ui/Switch';
+import { sanitizeText } from '../../lib/sanitizer';
 import type { Transaction, TransactionCategory } from '../../types/finance';
 
 export interface TransactionFormModalProps {
@@ -70,13 +71,17 @@ const TransactionFormContent: React.FC<FormContentProps> = ({
   const [category, setCategory] = useState<TransactionCategory>(initialData?.category || 'food_groceries');
   const [day, setDay] = useState(initialData ? initialData.day : currentDay);
   const [isRecurring, setIsRecurring] = useState(!!initialData?.isRecurring);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ description?: string; amount?: string; day?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const newErrors: { description?: string; amount?: string; day?: string } = {};
 
-    if (!description.trim()) {
+    const cleanDescription = sanitizeText(description);
+    if (!cleanDescription) {
       newErrors.description = 'Description is required';
     }
 
@@ -94,14 +99,19 @@ const TransactionFormContent: React.FC<FormContentProps> = ({
       return;
     }
 
-    onSubmit({
-      description: description.trim(),
-      amount: numAmount,
-      category,
-      day,
-      isRecurring,
-    });
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        description: cleanDescription,
+        amount: numAmount,
+        category,
+        day,
+        isRecurring,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -166,7 +176,14 @@ const TransactionFormContent: React.FC<FormContentProps> = ({
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" size="sm" className="font-bold">
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+          className="font-bold"
+        >
           {initialData ? 'Save Changes' : 'Record Transaction'}
         </Button>
       </div>

@@ -42,6 +42,7 @@ export const TransactionsView: React.FC = () => {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    showToast,
   } = useFinance();
 
   // Search & Filter State
@@ -137,7 +138,15 @@ export const TransactionsView: React.FC = () => {
           <Button
             variant="outline"
             size="md"
-            onClick={() => exportTransactionsToCsv(filteredTransactions)}
+            onClick={() =>
+              exportTransactionsToCsv(filteredTransactions, (res) => {
+                showToast({
+                  title: res.success ? 'Export Complete' : 'Export Notice',
+                  description: res.message,
+                  type: res.success ? 'success' : 'warning',
+                });
+              })
+            }
             disabled={filteredTransactions.length === 0}
             className="text-xs border-slate-700"
             title="Download CSV report of current records"

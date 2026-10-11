@@ -136,7 +136,14 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
             {formatINR(availableCash)} liquid across {remainingDays} days
           </span>
         </div>
-        <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+        <div
+          role="progressbar"
+          aria-valuenow={percentSpentToday}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Daily allowance utilization: ${percentSpentToday}%`}
+          className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50"
+        >
           <div
             className={`h-full rounded-full transition-all duration-300 ${
               isOverspentToday
