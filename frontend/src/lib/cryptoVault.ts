@@ -26,15 +26,21 @@ const CLIENT_APP_SECRET = 'thriftly_vault_sec_k98_2026';
  */
 function getRandomBytes(length: number): Uint8Array {
   const bytes = new Uint8Array(length);
-  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
-    crypto.getRandomValues(bytes);
-  } else {
-    // Fallback pseudo-random for test environments without full crypto
-    for (let i = 0; i < length; i++) {
-      bytes[i] = Math.floor(Math.random() * 256);
-    }
+  const cryptoObj =
+    typeof globalThis !== 'undefined' && globalThis.crypto
+      ? globalThis.crypto
+      : typeof window !== 'undefined' && window.crypto
+        ? window.crypto
+        : null;
+
+  if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+    cryptoObj.getRandomValues(bytes);
+    return bytes;
   }
-  return bytes;
+
+  throw new Error(
+    'Thriftly Security Error: Cryptographically secure random number generator (CSPRNG) is unavailable in this environment. Insecure Math.random() fallback is strictly prohibited for financial vault encryption.'
+  );
 }
 
 /**

@@ -14,6 +14,16 @@ export interface ModalProps {
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+const isElementVisible = (el: HTMLElement): boolean => {
+  if (el.offsetParent !== null) return true;
+  // Fallback for JSDOM / headless test runners where offsetParent evaluates to null
+  if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  }
+  return true;
+};
+
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -37,9 +47,11 @@ export const Modal: React.FC<ModalProps> = ({
     // 2. Move focus into modal (first focusable element or modal container)
     const timer = setTimeout(() => {
       if (modalRef.current) {
-        const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-        const autoFocusEl = modalRef.current.querySelector<HTMLElement>('[autofocus]');
-        if (autoFocusEl) {
+        const focusable = Array.from(
+          modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+        ).filter(isElementVisible);
+        const autoFocusEl = modalRef.current.querySelector<HTMLElement>('[autofocus], [data-autofocus]');
+        if (autoFocusEl && isElementVisible(autoFocusEl)) {
           autoFocusEl.focus();
         } else if (focusable.length > 0) {
           // Default to first interactive form element or close button
@@ -61,7 +73,7 @@ export const Modal: React.FC<ModalProps> = ({
       if (e.key === 'Tab' && modalRef.current) {
         const focusables = Array.from(
           modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-        ).filter((el) => el.offsetParent !== null); // only visible elements
+        ).filter(isElementVisible);
 
         if (focusables.length === 0) {
           e.preventDefault();

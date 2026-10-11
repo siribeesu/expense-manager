@@ -148,6 +148,28 @@ describe('Thriftly Production Hardening & Reliability Suite', () => {
       fireEvent.keyDown(window, { key: 'Escape' });
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
+
+    it('traps Tab key navigation inside modal focusable elements', () => {
+      render(
+        <Modal isOpen={true} onClose={() => {}} title="Tab Trap Modal">
+          <button type="button">Action 1</button>
+          <button type="button">Action 2</button>
+        </Modal>
+      );
+
+      const buttons = screen.getAllByRole('button');
+      expect(buttons.length).toBeGreaterThanOrEqual(2);
+
+      // Focus last button and press Tab (should cycle to first focusable)
+      const lastButton = buttons[buttons.length - 1];
+      lastButton.focus();
+      expect(document.activeElement).toBe(lastButton);
+
+      fireEvent.keyDown(window, { key: 'Tab', shiftKey: false });
+      // In Tab trap logic, it prevents default and focuses first element
+      const firstButton = buttons[0];
+      expect(document.activeElement).toBe(firstButton);
+    });
   });
 
   describe('3. Scoped Error Boundaries', () => {
@@ -158,7 +180,7 @@ describe('Thriftly Production Hardening & Reliability Suite', () => {
       return <div>Healthy Widget Content</div>;
     };
 
-    it('renders view-level scoped recovery card when level="view" without crashing whole app', () => {
+    it('renders view-level scoped recovery card when level="view" with accessible role="alert" and aria-live="assertive"', () => {
       // Suppress console.error output for expected error boundary test
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -168,9 +190,30 @@ describe('Thriftly Production Hardening & Reliability Suite', () => {
         </ErrorBoundary>
       );
 
+      const alertContainer = screen.getByRole('alert');
+      expect(alertContainer).toBeInTheDocument();
+      expect(alertContainer).toHaveAttribute('aria-live', 'assertive');
+
       expect(screen.getByText('View Temporarily Unavailable')).toBeInTheDocument();
       expect(screen.getByText('Simulation calculation fault')).toBeInTheDocument();
       expect(screen.getByText('Retry View')).toBeInTheDocument();
+
+      spy.mockRestore();
+    });
+
+    it('renders widget-level error boundary with role="alert"', () => {
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(
+        <ErrorBoundary level="widget">
+          <ProblemChild shouldThrow={true} />
+        </ErrorBoundary>
+      );
+
+      const alertContainer = screen.getByRole('alert');
+      expect(alertContainer).toBeInTheDocument();
+      expect(alertContainer).toHaveAttribute('aria-live', 'assertive');
+      expect(screen.getByText(/Widget display error:/)).toBeInTheDocument();
 
       spy.mockRestore();
     });
@@ -207,6 +250,33 @@ describe('Thriftly Production Hardening & Reliability Suite', () => {
       expect(result.success).toBe(false);
       expect(result.syncedToBackend).toBe(false);
       expect(result.error).toContain('Could not delete transaction');
+
+      global.fetch = originalFetch;
+    });
+
+    it('reports 401 authentication failure explicitly in sync error response', async () => {
+      const syncService = new FinanceSyncService();
+      syncService.setOnlineStatus(true);
+
+      const originalFetch = global.fetch;
+      global.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        json: async () => ({ error: 'Unauthorized', message: 'Token invalid' }),
+      } as any);
+
+      const result = await syncService.syncTransactionCreate({
+        description: 'Dinner',
+        amount: 500,
+        category: 'food_groceries',
+        day: 3,
+        dateStr: 'Day 3',
+        type: 'expense',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Authentication failure (401)');
 
       global.fetch = originalFetch;
     });
