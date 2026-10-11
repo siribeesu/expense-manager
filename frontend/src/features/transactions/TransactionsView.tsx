@@ -8,6 +8,8 @@ import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { TransactionFormModal } from './TransactionFormModal';
+import { exportTransactionsToCsv } from '../../lib/exportCsv';
+import { fireConfetti } from '../../lib/confetti';
 import {
   Search,
   Plus,
@@ -16,7 +18,21 @@ import {
   Receipt,
   Repeat,
   Calendar,
+  Download,
+  Filter,
 } from 'lucide-react';
+
+const CATEGORY_CHIPS: { id: string; label: string }[] = [
+  { id: 'all', label: 'All Items' },
+  { id: 'food_groceries', label: '🍔 Food' },
+  { id: 'transport', label: '🚇 Travel' },
+  { id: 'shopping', label: '🛍️ Shopping' },
+  { id: 'subscriptions', label: '📱 OTT/Apps' },
+  { id: 'bills_utilities', label: '⚡ Bills' },
+  { id: 'entertainment', label: '🎟️ Outings' },
+  { id: 'education', label: '📚 Study' },
+  { id: 'health_wellness', label: '💊 Health' },
+];
 
 export const TransactionsView: React.FC = () => {
   const {
@@ -59,6 +75,16 @@ export const TransactionsView: React.FC = () => {
     return filteredTransactions.reduce((sum, tx) => sum + tx.amount, 0);
   }, [filteredTransactions]);
 
+  const largestTransaction = useMemo(() => {
+    if (filteredTransactions.length === 0) return 0;
+    return Math.max(...filteredTransactions.map((t) => t.amount));
+  }, [filteredTransactions]);
+
+  const avgTransaction = useMemo(() => {
+    if (filteredTransactions.length === 0) return 0;
+    return Math.round(filteredTotal / filteredTransactions.length);
+  }, [filteredTransactions, filteredTotal]);
+
   const handleEdit = (tx: Transaction) => {
     setEditingTransaction(tx);
     setIsModalOpen(true);
@@ -90,71 +116,107 @@ export const TransactionsView: React.FC = () => {
         type: 'expense',
         isRecurring: data.isRecurring,
       });
+      fireConfetti();
     }
   };
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header and Add Action */}
+      {/* Header and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-white tracking-tight">
             Transaction Ledger
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Track, filter, and audit every single rupee spent in your 30-day budget period.
+            Audit, filter, and analyze every single rupee spent in your ₹10,000 runway cycle.
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="md"
-          onClick={() => {
-            setEditingTransaction(null);
-            setIsModalOpen(true);
-          }}
-          className="font-bold shrink-0"
-        >
-          <Plus className="w-4 h-4 mr-1.5" /> Record Expense
-        </Button>
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            size="md"
+            onClick={() => exportTransactionsToCsv(filteredTransactions)}
+            disabled={filteredTransactions.length === 0}
+            className="text-xs border-slate-700"
+            title="Download CSV report of current records"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5" /> Export CSV
+          </Button>
+
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => {
+              setEditingTransaction(null);
+              setIsModalOpen(true);
+            }}
+            className="font-bold shrink-0 text-xs"
+          >
+            <Plus className="w-4 h-4 mr-1.5" /> Record Expense
+          </Button>
+        </div>
+      </div>
+
+      {/* Ledger Analytics Ribbon */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        <Card className="p-3.5 flex flex-col justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Filtered Outlay
+          </span>
+          <span className="text-xl font-extrabold text-white font-mono mt-1">
+            {formatINR(filteredTotal)}
+          </span>
+          <span className="text-[11px] text-slate-400 mt-0.5">Across current selection</span>
+        </Card>
+
+        <Card className="p-3.5 flex flex-col justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Total Records
+          </span>
+          <span className="text-xl font-extrabold text-[#C8FF55] font-mono mt-1">
+            {filteredTransactions.length}
+          </span>
+          <span className="text-[11px] text-slate-400 mt-0.5">of {transactions.length} total logged</span>
+        </Card>
+
+        <Card className="p-3.5 flex flex-col justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Average Spend
+          </span>
+          <span className="text-xl font-extrabold text-cyan-400 font-mono mt-1">
+            {formatINR(avgTransaction)}
+          </span>
+          <span className="text-[11px] text-slate-400 mt-0.5">Per recorded transaction</span>
+        </Card>
+
+        <Card className="p-3.5 flex flex-col justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Largest Outlay
+          </span>
+          <span className="text-xl font-extrabold text-amber-400 font-mono mt-1">
+            {formatINR(largestTransaction)}
+          </span>
+          <span className="text-[11px] text-slate-400 mt-0.5">Peak single purchase</span>
+        </Card>
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 space-y-3">
+      <Card className="p-4 space-y-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
           {/* Search Box */}
-          <div className="sm:col-span-5">
+          <div className="sm:col-span-8">
             <Input
-              placeholder="Search by description or merchant..."
+              placeholder="Search by description or merchant (e.g. Swiggy, Uber, Noise)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               prefixElement={<Search className="w-4 h-4" />}
             />
           </div>
 
-          {/* Category Dropdown */}
-          <div className="sm:col-span-4">
-            <select
-              aria-label="Filter transactions by category"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-[#0E1526] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-[#C8FF55] focus:outline-none"
-            >
-              <option value="all">All Categories</option>
-              <option value="food_groceries">Food & Groceries</option>
-              <option value="transport">Travel & Metro</option>
-              <option value="education">Study & Books</option>
-              <option value="entertainment">Outings & Entertainment</option>
-              <option value="shopping">Shopping & Gear</option>
-              <option value="subscriptions">OTT & Subscriptions</option>
-              <option value="health_wellness">Health & Pharmacy</option>
-              <option value="bills_utilities">Bills & WiFi</option>
-              <option value="other">Miscellaneous</option>
-            </select>
-          </div>
-
           {/* Sort Dropdown */}
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-4">
             <select
               aria-label="Sort transactions"
               value={sortBy}
@@ -169,16 +231,26 @@ export const TransactionsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter stats count */}
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
-          <span>
-            Showing <strong className="text-white">{filteredTransactions.length}</strong> of{' '}
-            {transactions.length} records
-          </span>
-          <span>
-            Filtered Total:{' '}
-            <strong className="text-[#C8FF55] font-mono">{formatINR(filteredTotal)}</strong>
-          </span>
+        {/* Category Filter Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar">
+          <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0 mr-1" />
+          {CATEGORY_CHIPS.map((chip) => {
+            const isSelected = selectedCategory === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => setSelectedCategory(chip.id)}
+                className={`text-xs px-3 py-1.5 rounded-xl font-medium shrink-0 transition-all cursor-pointer border ${
+                  isSelected
+                    ? 'bg-[#C8FF55] text-[#0B1020] font-bold border-[#C8FF55] shadow-sm'
+                    : 'bg-slate-800/70 hover:bg-slate-700/80 text-slate-300 border-slate-700'
+                }`}
+              >
+                {chip.label}
+              </button>
+            );
+          })}
         </div>
       </Card>
 
@@ -224,7 +296,7 @@ export const TransactionsView: React.FC = () => {
                 {/* Left: Icon, Description & Meta */}
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                     style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
                   >
                     <span className="text-xs font-bold">{meta.label.slice(0, 2)}</span>
@@ -280,7 +352,7 @@ export const TransactionsView: React.FC = () => {
                     <button
                       onClick={() => handleEdit(tx)}
                       aria-label={`Edit ${tx.description}`}
-                      className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title="Edit transaction"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -288,7 +360,7 @@ export const TransactionsView: React.FC = () => {
                     <button
                       onClick={() => setDeleteTargetId(tx.id)}
                       aria-label={`Delete ${tx.description}`}
-                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
                       title="Delete transaction"
                     >
                       <Trash2 className="w-4 h-4" />

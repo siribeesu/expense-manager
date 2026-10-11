@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { type ActiveTab, Sidebar } from './Sidebar';
 import { TopNavbar } from './TopNavbar';
 import { MobileNav } from './MobileNav';
 import { ToastContainer } from '../common/ToastContainer';
+import { CommandPalette } from '../common/CommandPalette';
+import { KeyboardShortcutsModal } from '../common/KeyboardShortcutsModal';
 import { DashboardView } from '../../features/dashboard/DashboardView';
 import { SimulatorView } from '../../features/simulator/SimulatorView';
 import { TransactionsView } from '../../features/transactions/TransactionsView';
@@ -11,31 +13,120 @@ import { CommitmentsView } from '../../features/commitments/CommitmentsView';
 import { InsightsView } from '../../features/insights/InsightsView';
 import { TransactionFormModal } from '../../features/transactions/TransactionFormModal';
 import { useFinance } from '../../context/useFinance';
+import { useTheme } from '../../context/useTheme';
+import { exportTransactionsToCsv } from '../../lib/exportCsv';
+import { fireConfetti } from '../../lib/confetti';
 
 export const AppLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
-  const { currentDay, totalDays, addTransaction } = useFinance();
+  const { currentDay, totalDays, addTransaction, advanceDay, transactions } = useFinance();
+  const { toggleTheme } = useTheme();
+
+  const handleNavigate = useCallback((tab: ActiveTab) => {
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Global Keyboard Shortcuts (Pro-user power navigation)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input, textarea, or select
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      const isInputFocused =
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        activeTag === 'select' ||
+        (document.activeElement as HTMLElement)?.isContentEditable;
+
+      // 1. Command Palette: Cmd+K or Ctrl+K
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      // If user is actively typing in a form field, don't hijack single keys
+      if (isInputFocused) return;
+
+      // 2. Help modal: ?
+      if (e.key === '?') {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+        return;
+      }
+
+      // 3. New Expense: N
+      if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setIsQuickAddOpen(true);
+        return;
+      }
+
+      // 4. Advance Day: D
+      if (e.key.toLowerCase() === 'd' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        advanceDay();
+        return;
+      }
+
+      // 5. Toggle Theme: T
+      if (e.key.toLowerCase() === 't' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        toggleTheme();
+        return;
+      }
+
+      // 6. Number keys 1-6 for quick tab jumping
+      const tabMap: Record<string, ActiveTab> = {
+        '1': 'overview',
+        '2': 'simulator',
+        '3': 'transactions',
+        '4': 'goals',
+        '5': 'commitments',
+        '6': 'insights',
+      };
+      if (tabMap[e.key] && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleNavigate(tabMap[e.key]);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [handleNavigate, advanceDay, toggleTheme]);
 
   return (
-    <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#C8FF55]/30 selection:text-[#C8FF55]">
+    <div className="min-h-screen bg-[#0B1020] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#C8FF55]/30 selection:text-[#C8FF55] relative overflow-x-hidden">
+      {/* Subtle Ambient Background Mesh / Radial Glows */}
+      <div
+        className="fixed top-0 left-1/4 w-[600px] h-[400px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none -z-10"
+        aria-hidden="true"
+      />
+      <div
+        className="fixed top-1/3 right-10 w-[500px] h-[400px] bg-indigo-500/5 rounded-full blur-[140px] pointer-events-none -z-10"
+        aria-hidden="true"
+      />
+
       {/* Top Navbar */}
       <TopNavbar
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenAddExpense={() => setIsQuickAddOpen(true)}
       />
 
       <div className="flex-1 flex w-full">
         {/* Desktop Sidebar & Mobile Drawer */}
         <Sidebar
           activeTab={activeTab}
-          onTabChange={(tab) => {
-            setActiveTab(tab);
-            setIsSidebarOpen(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onTabChange={handleNavigate}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
@@ -45,13 +136,10 @@ export const AppLayout: React.FC = () => {
           id="main-content"
           className="flex-1 lg:pl-64 w-full transition-all duration-150"
         >
-          <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto">
+          <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
             {activeTab === 'overview' && (
               <DashboardView
-                onNavigate={(tab) => {
-                  setActiveTab(tab);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onNavigate={handleNavigate}
                 onOpenAddTransaction={() => setIsQuickAddOpen(true)}
               />
             )}
@@ -66,10 +154,7 @@ export const AppLayout: React.FC = () => {
 
             {activeTab === 'insights' && (
               <InsightsView
-                onNavigate={(tab) => {
-                  setActiveTab(tab);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onNavigate={handleNavigate}
               />
             )}
           </div>
@@ -79,14 +164,26 @@ export const AppLayout: React.FC = () => {
       {/* Mobile Bottom Navigation */}
       <MobileNav
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onTabChange={handleNavigate}
       />
 
       {/* Accessible Notifications / Toasts */}
       <ToastContainer />
+
+      {/* Command Palette (⌘K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigate={handleNavigate}
+        onOpenAddExpense={() => setIsQuickAddOpen(true)}
+        onExportCsv={() => exportTransactionsToCsv(transactions)}
+      />
+
+      {/* Keyboard Shortcuts Helper Modal (?) */}
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
 
       {/* Quick Add Expense Modal */}
       <TransactionFormModal
@@ -102,6 +199,7 @@ export const AppLayout: React.FC = () => {
             type: 'expense',
             isRecurring: data.isRecurring,
           });
+          fireConfetti();
         }}
         currentDay={currentDay}
         totalDays={totalDays}

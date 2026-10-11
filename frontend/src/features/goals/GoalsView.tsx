@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { GoalFormModal } from './GoalFormModal';
 import { ContributeModal } from './ContributeModal';
+import { fireConfetti } from '../../lib/confetti';
 import {
   PiggyBank,
   Plus,
@@ -290,7 +291,11 @@ export const GoalsView: React.FC = () => {
         goal={transferGoal}
         mode={transferMode}
         availableCash={metrics.availableCash}
-        onDeposit={contributeToGoal}
+        onDeposit={(goalId, amount) => {
+          const ok = contributeToGoal(goalId, amount);
+          if (ok) fireConfetti();
+          return ok;
+        }}
         onWithdraw={withdrawFromGoal}
       />
 

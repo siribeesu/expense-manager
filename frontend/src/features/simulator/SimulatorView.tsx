@@ -18,6 +18,7 @@ import {
   RotateCcw,
   CheckCircle2,
 } from 'lucide-react';
+import { fireConfetti } from '../../lib/confetti';
 
 export const SimulatorView: React.FC = () => {
   const {
@@ -72,6 +73,7 @@ export const SimulatorView: React.FC = () => {
     setIsCommitting(false);
     if (success) {
       setInputError(null);
+      fireConfetti();
     }
   };
 

@@ -57,7 +57,7 @@ export const ScenarioCards: React.FC<ScenarioCardsProps> = ({
                   type: scenario.type,
                 })
               }
-              className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all duration-150 ${
+              className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all duration-150 hover:-translate-y-0.5 ${
                 isSelected
                   ? 'bg-[#C8FF55]/15 border-[#C8FF55] shadow-[0_0_15px_rgba(200,255,85,0.15)]'
                   : 'bg-[#0E1526] border-slate-800 hover:border-slate-700 hover:bg-[#131B2F]'

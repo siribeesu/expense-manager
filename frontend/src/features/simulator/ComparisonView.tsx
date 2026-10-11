@@ -83,7 +83,8 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           </p>
         </div>
         <Badge variant={projection.deltaHealthScore < -10 ? 'amber' : 'lime'}>
-          {projection.deltaDailyAllowance} / day impact
+          {projection.deltaDailyAllowance < 0 ? '-' : '+'}
+          {formatINR(Math.abs(projection.deltaDailyAllowance))}/day impact
         </Badge>
       </div>
 

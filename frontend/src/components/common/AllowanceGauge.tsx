@@ -2,6 +2,8 @@ import React from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { formatINR } from '../../lib/formatters';
+import { Sparkles, Coffee, Train, UtensilsCrossed } from 'lucide-react';
+import { fireConfetti } from '../../lib/confetti';
 
 export interface AllowanceGaugeProps {
   safeDailyAllowance: number;
@@ -10,6 +12,7 @@ export interface AllowanceGaugeProps {
   remainingDays: number;
   availableCash: number;
   isPaceSustainable: boolean;
+  onQuickSpend?: (amount: number, description: string, category: 'food_groceries' | 'transport') => void;
 }
 
 export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
@@ -19,17 +22,30 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
   remainingDays,
   availableCash,
   isPaceSustainable,
+  onQuickSpend,
 }) => {
   const percentSpentToday =
     safeDailyAllowance > 0 ? Math.min(100, Math.round((spentToday / safeDailyAllowance) * 100)) : 100;
 
   const isOverspentToday = spentToday > safeDailyAllowance;
 
+  const handleQuickLog = (amount: number, desc: string, cat: 'food_groceries' | 'transport') => {
+    if (onQuickSpend) {
+      onQuickSpend(amount, desc, cat);
+      if (!isOverspentToday) {
+        fireConfetti();
+      }
+    }
+  };
+
   return (
-    <Card className="flex flex-col justify-between p-5 relative overflow-hidden bg-gradient-to-br from-[#131B2F] via-[#131B2F] to-[#1A2542] border border-slate-700/60 shadow-xl">
+    <Card className="flex flex-col justify-between p-5 relative overflow-hidden bg-gradient-to-br from-[#131B2F] via-[#131B2F] to-[#1A2542] border border-slate-700/60 shadow-xl transition-all">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
+            <span className="p-1 rounded-md bg-[#C8FF55]/20 text-[#C8FF55]">
+              <Sparkles className="w-3.5 h-3.5" />
+            </span>
             <span className="text-xs font-bold text-[#C8FF55] uppercase tracking-wider">
               Smart Runway Engine
             </span>
@@ -37,9 +53,11 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
           </div>
           <h2 className="text-xl font-bold text-white mt-1">Safe Daily Spending Limit</h2>
         </div>
-        <Badge variant={isPaceSustainable ? 'lime' : 'amber'}>
-          {isPaceSustainable ? 'Runway Sustainable' : 'Pace Warning'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={isPaceSustainable ? 'lime' : 'amber'}>
+            {isPaceSustainable ? '✨ Runway Sustainable' : '⚠️ Pace Warning'}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 my-4 p-4 rounded-xl bg-[#0E1526]/80 border border-slate-800">
@@ -79,6 +97,34 @@ export const AllowanceGauge: React.FC<AllowanceGaugeProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Quick Spend Micro-Chips */}
+      {onQuickSpend && (
+        <div className="flex items-center gap-2 mb-3.5 flex-wrap">
+          <span className="text-[11px] font-semibold text-slate-400">Quick Log Spend:</span>
+          <button
+            type="button"
+            onClick={() => handleQuickLog(50, 'Chai & Snacks', 'food_groceries')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium cursor-pointer transition-all active:scale-95"
+          >
+            <Coffee className="w-3 h-3 text-amber-400" /> +₹50 Chai
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickLog(120, 'Metro / Auto Fare', 'transport')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium cursor-pointer transition-all active:scale-95"
+          >
+            <Train className="w-3 h-3 text-cyan-400" /> +₹120 Metro
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickLog(250, 'Zomato Lunch Meal', 'food_groceries')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium cursor-pointer transition-all active:scale-95"
+          >
+            <UtensilsCrossed className="w-3 h-3 text-emerald-400" /> +₹250 Lunch
+          </button>
+        </div>
+      )}
 
       {/* Daily Progress Bar */}
       <div className="space-y-1.5">
