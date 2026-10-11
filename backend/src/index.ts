@@ -2,15 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import { apiRouter } from './routes/api';
 import { securityHeadersMiddleware, rateLimiterMiddleware } from './middleware/security';
+import { authMiddleware } from './middleware/auth';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Security Middleware
+// Security & Authentication Middleware
 app.use(securityHeadersMiddleware);
 app.use(cors());
 app.use(express.json({ limit: '100kb' })); // Mitigate body flooding
 app.use(rateLimiterMiddleware);
+app.use(authMiddleware);
 
 // API routes (supports both /api path prefix and root rewrites)
 app.use('/api', apiRouter);

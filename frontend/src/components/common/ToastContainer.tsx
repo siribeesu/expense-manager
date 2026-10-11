@@ -5,18 +5,45 @@ import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
 export const ToastContainer: React.FC = () => {
   const { toasts, dismissToast } = useFinance();
 
-  if (toasts.length === 0) return null;
+  // Announce the newest toast to assistive technology / screen readers
+  const newest = toasts.length > 0 ? toasts[toasts.length - 1] : null;
+  const announcement = newest
+    ? {
+        message: `${newest.title}. ${newest.description || ''}`,
+        priority: newest.type === 'error' ? ('assertive' as const) : ('polite' as const),
+      }
+    : null;
 
   return (
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      className="fixed bottom-16 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"
-    >
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onDismiss={() => dismissToast(toast.id)} />
-      ))}
-    </div>
+    <>
+      {/* Persistent Invisible Screen Reader Live Announcers (Always in DOM) */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement?.priority === 'polite' ? announcement.message : ''}
+      </div>
+      <div
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement?.priority === 'assertive' ? announcement.message : ''}
+      </div>
+
+      {/* Visual Toast Container */}
+      <div
+        className="fixed bottom-16 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"
+        aria-hidden="false"
+      >
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onDismiss={() => dismissToast(toast.id)} />
+        ))}
+      </div>
+    </>
   );
 };
 
@@ -38,7 +65,6 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: () => void }> = ({ t
   return (
     <div
       role={toast.type === 'error' ? 'alert' : 'status'}
-      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
       className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl border shadow-xl backdrop-blur-md transition-all animate-in slide-in-from-right duration-200 ${borders[toast.type]}`}
     >
       {icons[toast.type]}
@@ -50,7 +76,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: () => void }> = ({ t
       </div>
       <button
         onClick={onDismiss}
-        aria-label="Dismiss notification"
+        aria-label={`Dismiss notification: ${toast.title}`}
         className="text-slate-400 hover:text-white p-1 rounded transition-colors"
       >
         <X className="w-4 h-4" />

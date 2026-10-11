@@ -1,5 +1,6 @@
 import type { Transaction, SavingsGoal, Commitment } from '../types/finance';
 import { AppStoredStateSchema } from './schemas';
+import { encryptVaultData, decryptVaultData } from './cryptoVault';
 import {
   INITIAL_TOTAL_BUDGET,
   INITIAL_CURRENT_DAY,
@@ -19,9 +20,6 @@ const STORAGE_KEYS = {
   ENCRYPTED_VAULT: 'thriftly_vault_v1',
   LEGACY_VAULT: 'paisapilot_vault_v1',
 };
-
-const VAULT_PREFIX = 'PP_ENC_V1:';
-const VAULT_KEY = 0x5a; // Client-side obfuscation mask
 
 // Memory storage fallback when localStorage is blocked or unavailable
 const memoryStore = new Map<string, string>();
@@ -55,40 +53,6 @@ function removeStorageItem(key: string): void {
   memoryStore.delete(key);
 }
 
-/**
- * Encrypts/obfuscates string data to prevent cleartext financial exposure in DevTools / localStorage
- */
-function protectData(cleartext: string): string {
-  try {
-    const chars = cleartext.split('');
-    const encoded = chars
-      .map((c) => String.fromCharCode(c.charCodeAt(0) ^ VAULT_KEY))
-      .join('');
-    return VAULT_PREFIX + btoa(encodeURIComponent(encoded));
-  } catch {
-    return cleartext;
-  }
-}
-
-/**
- * Decrypts/de-obfuscates data from localStorage
- */
-function unprotectData(cipherText: string): string {
-  try {
-    if (!cipherText.startsWith(VAULT_PREFIX)) {
-      return cipherText; // Backwards compatible with legacy unencrypted data
-    }
-    const raw = atob(cipherText.slice(VAULT_PREFIX.length));
-    const decoded = decodeURIComponent(raw);
-    return decoded
-      .split('')
-      .map((c) => String.fromCharCode(c.charCodeAt(0) ^ VAULT_KEY))
-      .join('');
-  } catch {
-    return cipherText;
-  }
-}
-
 export interface AppStoredState {
   totalBudget: number;
   currentDay: number;
@@ -103,11 +67,13 @@ export function loadStoredState(): AppStoredState {
     // 1. Try modern encrypted vault format first (migrates legacy vault if present)
     const vault = getStorageItem(STORAGE_KEYS.ENCRYPTED_VAULT) || getStorageItem(STORAGE_KEYS.LEGACY_VAULT);
     if (vault) {
-      const decrypted = unprotectData(vault);
-      const parsed = JSON.parse(decrypted);
-      const validation = AppStoredStateSchema.safeParse(parsed);
-      if (validation.success) {
-        return validation.data as AppStoredState;
+      const decrypted = decryptVaultData(vault);
+      if (decrypted) {
+        const parsed = JSON.parse(decrypted);
+        const validation = AppStoredStateSchema.safeParse(parsed);
+        if (validation.success) {
+          return validation.data as AppStoredState;
+        }
       }
     }
 
@@ -134,7 +100,7 @@ export function loadStoredState(): AppStoredState {
 
     const validation = AppStoredStateSchema.safeParse(candidateState);
     if (validation.success) {
-      // Save in protected vault
+      // Save in protected authenticated vault
       saveStoredState(candidateState);
       return validation.data as AppStoredState;
     }
@@ -151,7 +117,7 @@ export function saveStoredState(state: AppStoredState): void {
     // Validate with Zod before writing
     const validated = AppStoredStateSchema.parse(state);
     const payload = JSON.stringify(validated);
-    const encrypted = protectData(payload);
+    const encrypted = encryptVaultData(payload);
     setStorageItem(STORAGE_KEYS.ENCRYPTED_VAULT, encrypted);
   } catch (error) {
     console.error('Failed to securely save state to storage:', error);

@@ -46,7 +46,15 @@ export const AppLayout: React.FC = () => {
   const handleNavigate = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try {
+      window.scrollTo(0, 0);
+    } catch {
+      // Cross-browser fallback
+    }
+    if (typeof document !== 'undefined') {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
   }, []);
 
   // Global Keyboard Shortcuts (Pro-user power navigation)
@@ -160,7 +168,7 @@ export const AppLayout: React.FC = () => {
           className="flex-1 lg:pl-64 w-full transition-all duration-150"
         >
           <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-[1720px] mx-auto animate-in fade-in duration-200">
-            <ErrorBoundary>
+            <ErrorBoundary level="view">
               <Suspense fallback={<ViewSkeleton />}>
                 {activeTab === 'overview' && (
                   <DashboardView

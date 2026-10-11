@@ -34,6 +34,33 @@ export const CommitmentsView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCommitment, setEditingCommitment] = useState<Commitment | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+
+  const handleMarkPaid = (id: string) => {
+    if (processingIds.has(id)) return;
+    setProcessingIds((prev) => new Set(prev).add(id));
+    markCommitmentPaid(id);
+    setTimeout(() => {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 400);
+  };
+
+  const handleUnmarkPaid = (id: string) => {
+    if (processingIds.has(id)) return;
+    setProcessingIds((prev) => new Set(prev).add(id));
+    unmarkCommitmentPaid(id);
+    setTimeout(() => {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 400);
+  };
 
   // Subscriptions vs general commitments
   const unpaidCommitments = commitments.filter((c) => !c.isPaid);
@@ -199,7 +226,9 @@ export const CommitmentsView: React.FC = () => {
                       <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => markCommitmentPaid(com.id)}
+                        onClick={() => handleMarkPaid(com.id)}
+                        disabled={processingIds.has(com.id)}
+                        isLoading={processingIds.has(com.id)}
                         className="text-xs font-bold"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Paid
@@ -267,7 +296,9 @@ export const CommitmentsView: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => unmarkCommitmentPaid(com.id)}
+                      onClick={() => handleUnmarkPaid(com.id)}
+                      disabled={processingIds.has(com.id)}
+                      isLoading={processingIds.has(com.id)}
                       className="text-xs text-slate-400 hover:text-white"
                     >
                       <RotateCcw className="w-3 h-3 mr-1" /> Revert

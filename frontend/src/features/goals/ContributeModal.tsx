@@ -26,6 +26,7 @@ export const ContributeModal: React.FC<ContributeModalProps> = ({
 }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!goal) return null;
 
@@ -40,6 +41,8 @@ export const ContributeModal: React.FC<ContributeModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const numAmount = Number(amount);
 
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
@@ -56,14 +59,19 @@ export const ContributeModal: React.FC<ContributeModalProps> = ({
       return;
     }
 
-    const success = isDeposit
-      ? onDeposit(goal.id, numAmount)
-      : onWithdraw(goal.id, numAmount);
+    try {
+      setIsSubmitting(true);
+      const success = isDeposit
+        ? onDeposit(goal.id, numAmount)
+        : onWithdraw(goal.id, numAmount);
 
-    if (success) {
-      setAmount('');
-      setError(null);
-      onClose();
+      if (success) {
+        setAmount('');
+        setError(null);
+        onClose();
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,6 +136,8 @@ export const ContributeModal: React.FC<ContributeModalProps> = ({
             type="submit"
             variant={isDeposit ? 'primary' : 'secondary'}
             size="sm"
+            isLoading={isSubmitting}
+            disabled={isSubmitting || maxAvailable <= 0}
             className="font-bold"
           >
             {isDeposit ? 'Confirm Deposit' : 'Confirm Withdrawal'}

@@ -13,6 +13,57 @@ apiRouter.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Authentication Endpoints
+apiRouter.post('/auth/login', (req: Request, res: Response) => {
+  const { pin } = req.body || {};
+  const validPin = process.env.THRIFTLY_PIN || '1234';
+  const token = process.env.THRIFTLY_AUTH_TOKEN || 'thriftly-pilot-token-2026';
+
+  if (!pin || String(pin) !== validPin) {
+    res.status(401).json({
+      error: 'Invalid Credentials',
+      message: 'Incorrect PIN provided for Thriftly financial account.',
+    });
+    return;
+  }
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: 'usr_pilot_01',
+      name: 'Pilot User',
+      role: 'owner',
+    },
+    message: 'Authentication successful',
+  });
+});
+
+apiRouter.get('/auth/verify', (req: Request, res: Response) => {
+  const authHeader = req.headers['authorization'];
+  const customHeader = req.headers['x-thriftly-auth'];
+  const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = bearerToken || (typeof customHeader === 'string' ? customHeader : null);
+  const validToken = process.env.THRIFTLY_AUTH_TOKEN || 'thriftly-pilot-token-2026';
+
+  if (token === validToken) {
+    res.json({
+      valid: true,
+      user: {
+        id: 'usr_pilot_01',
+        name: 'Pilot User',
+        role: 'owner',
+      },
+    });
+    return;
+  }
+
+  res.status(401).json({
+    valid: false,
+    error: 'Invalid or expired session token',
+  });
+});
+
 // State Management
 apiRouter.get('/state', (_req: Request, res: Response) => {
   res.json(db.getState());
