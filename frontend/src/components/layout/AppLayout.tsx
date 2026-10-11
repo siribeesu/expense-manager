@@ -119,7 +119,6 @@ export const AppLayout: React.FC = () => {
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
-        onOpenAddExpense={() => setIsQuickAddOpen(true)}
       />
 
       <div className="flex-1 flex w-full">
