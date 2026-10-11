@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import type { FinancialHealthBreakdown } from '../../types/finance';
+import { useTheme } from '../../context/useTheme';
 
 export interface HealthGaugeProps {
   health: FinancialHealthBreakdown;
@@ -15,6 +16,7 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
   simulatedHealthScore,
   simulatedRiskLevel,
 }) => {
+  const { theme } = useTheme();
   const isComparing = simulatedHealthScore !== undefined && simulatedHealthScore !== health.totalScore;
   const activeScore = isComparing ? simulatedHealthScore : health.totalScore;
   const activeRisk = isComparing && simulatedRiskLevel ? simulatedRiskLevel : health.riskLevel;
@@ -28,7 +30,7 @@ export const HealthGauge: React.FC<HealthGaugeProps> = ({
 
   const riskColors = {
     low: '#10B981',
-    moderate: '#C8FF55',
+    moderate: theme === 'dark' ? '#C8FF55' : '#16A34A',
     high: '#F59E0B',
     critical: '#FF5C5C',
   };

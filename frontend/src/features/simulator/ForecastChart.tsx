@@ -39,7 +39,7 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
           </div>
           <div className="flex items-center gap-3 text-xs font-mono">
             <span className="flex items-center gap-1.5 text-slate-300">
-              <span className="w-3 h-0.5 bg-[#C8FF55]" /> Current Plan
+              <span className={`w-3 h-0.5 ${theme === 'dark' ? 'bg-[#C8FF55]' : 'bg-[#16A34A]'}`} /> Current Plan
             </span>
             <span className="flex items-center gap-1.5 text-amber-400">
               <span className="w-3 h-0.5 bg-amber-400 border-dashed" /> Simulated Trajectory
@@ -124,10 +124,10 @@ export const ForecastChart: React.FC<ForecastChartProps> = ({
             <Line
               type="monotone"
               dataKey="projectedCumulativeSpent"
-              stroke="#C8FF55"
+              stroke={theme === 'dark' ? '#C8FF55' : '#16A34A'}
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 5, fill: '#C8FF55' }}
+              activeDot={{ r: 5, fill: theme === 'dark' ? '#C8FF55' : '#16A34A' }}
             />
             {/* Simulated Spend */}
             <Line

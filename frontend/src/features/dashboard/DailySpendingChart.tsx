@@ -56,7 +56,7 @@ export const DailySpendingChart: React.FC<DailySpendingChartProps> = ({
           <CardTitle>Daily Spending Velocity</CardTitle>
           <div className="flex items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5 text-slate-400">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#C8FF55]" />
+              <span className={`w-2.5 h-2.5 rounded-sm ${theme === 'dark' ? 'bg-[#C8FF55]' : 'bg-[#16A34A]'}`} />
               Actual Spend
             </span>
             <span className="flex items-center gap-1.5 text-slate-400">
